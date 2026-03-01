@@ -3,14 +3,14 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TruckLog NL Pro Dashboard</title>
+<title>TruckLog NL Pro</title>
 <style>
 :root {
     --primary: #2c3e50;
     --secondary: #27ae60;
     --accent: #2980b9;
-    --danger: #e74c3c;
     --bg: #f4f7f6;
+    --danger: #e74c3c;
 }
 
 body {
@@ -21,122 +21,222 @@ body {
     padding-bottom: 50px;
 }
 
-h1 { text-align:center; color:var(--primary); margin-bottom:25px; font-size:1.8rem; }
-h2 { margin: 0 0 15px 0; font-size: 1.2rem; color: var(--primary); border-bottom: 2px solid #eee; padding-bottom: 5px; }
+.card {
+    background: white;
+    padding: 15px;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+    margin-bottom: 15px;
+}
 
-label { display: block; margin: 12px 0 6px; font-weight: bold; font-size: 0.9rem; color: #555; }
-input, select { width: 100%; padding: 14px; border: 1px solid #ddd; border-radius: 10px; box-sizing: border-box; font-size: 1rem; margin-bottom: 8px; }
+h1, h2 {
+    color: var(--primary);
+    margin: 0 0 15px 0;
+}
 
-.card { background: white; padding: 18px; border-radius: 14px; box-shadow: 0 6px 10px rgba(0,0,0,0.07); margin-bottom: 20px; }
-.card-dark { background: var(--primary); color: white; }
-.card-dark h2 { color: white; border-bottom: 2px solid rgba(255,255,255,0.2); }
+label {
+    display: block;
+    margin: 10px 0 5px;
+    font-weight: bold;
+    font-size: 0.8rem;
+    color: #555;
+}
 
-.btn { background: var(--secondary); color: white; border: none; padding: 14px; border-radius: 10px; font-weight: bold; cursor: pointer; margin-top: 0px; font-size:1.05rem; }
-.btn-calc { background: var(--primary); margin-top:12px; }
-.btn:hover { opacity:0.92; transform: translateY(-2px); transition:0.2s ease; }
-.btn-sm { padding: 10px 14px; margin: 3px; font-size: 0.95rem; border-radius: 8px; border: none; cursor: pointer; color: white; }
-.btn-sm:hover { opacity:0.85; }
+input, select, textarea {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-sizing: border-box;
+    font-size: 1rem;
+    margin-bottom: 5px;
+}
 
-.history-item { border-left: 5px solid var(--accent); padding: 14px; margin-bottom: 12px; background: #fafafa; font-size: 0.9rem; border-radius: 0 10px 10px 0; word-break: break-word; display:flex; justify-content:space-between; align-items:center; }
+textarea { resize: vertical; }
 
-.manual-fields { display: none; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-top: 12px; }
+button {
+    cursor: pointer;
+}
 
-.bar-graph { display:flex; justify-content: space-between; margin-bottom:15px; gap:6px; }
-.bar { flex:1; display:flex; flex-direction: column-reverse; align-items:center; justify-content:flex-start; border-radius:6px; background:#eee; position:relative; overflow:hidden; }
-.bar div { width:100%; position:absolute; bottom:0; text-align:center; color:white; font-size:0.7rem; font-weight:bold; border-radius:6px 6px 0 0; }
-.bar .reg { background: var(--accent); }
-.bar .ot { background: orange; }
-.bar .dt { background: var(--danger); }
+.btn {
+    background: var(--secondary);
+    color: white;
+    border: none;
+    padding: 15px;
+    width: 100%;
+    border-radius: 8px;
+    font-weight: bold;
+    margin-top: 10px;
+}
 
-@media (max-width: 600px) {
+.btn-sm {
+    padding: 8px 12px;
+    margin: 2px;
+    font-size: 0.9rem;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+    color: white;
+}
+
+.tab-buttons {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.tab-buttons button {
+    flex: 1;
+    padding: 12px;
+    font-weight: bold;
+    border-radius: 8px;
+    border: none;
+    color: white;
+}
+
+.tab-buttons button.active { background: var(--primary); }
+.tab-buttons button.inactive { background: #7f8c8d; }
+
+.history-item {
+    border-left: 4px solid var(--accent);
+    padding: 12px;
+    margin-bottom: 10px;
+    background: #fafafa;
+    font-size: 0.85rem;
+    border-radius: 0 8px 8px 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.manual-fields {
+    display: none;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 8px;
+    margin-top: 12px;
+}
+
+@media (max-width:600px){
     .manual-fields { grid-template-columns: 1fr; }
-    input, select { font-size: 1.05rem; padding: 16px; }
-    .btn { font-size: 1.1rem; padding: 16px; }
+    input, select, textarea { font-size:1.05rem; padding:16px; }
+    .btn { font-size:1.1rem; padding:16px; }
 }
 </style>
 </head>
 <body>
 
-<h1>🚛 TruckLog NL Pro</h1>
+<h1 style="text-align:center;">🚛 TruckLog NL Pro</h1>
 
-<!-- Log New Shift -->
-<div class="card">
-    <h2>Log New Shift</h2>
-    <label>Date</label>
-    <input type="date" id="dateInput">
-
-    <label>Truck Number</label>
-    <select id="truckNumber">
-        <option value="1">1</option><option value="2">2</option><option value="3">3</option>
-        <option value="4">4</option><option value="5">5</option><option value="6">6</option>
-        <option value="7">7</option><option value="8">8</option><option value="9">9</option>
-        <option value="10">10</option><option value="11">11</option>
-        <option value="12">12</option><option value="13">13</option>
-        <option value="14">14</option><option value="15">15</option>
-    </select>
-
-    <div style="margin: 12px 0; font-size: 0.95rem; display:flex; align-items:center; gap:8px;">
-        <strong>Manual Entry</strong>
-        <input type="checkbox" id="manualToggle" onchange="toggleManual()">
-    </div>
-
-    <div id="autoInputSection">
-        <label>Total Hours Worked</label>
-        <input type="number" id="hoursInput" step="0.25" placeholder="0.00">
-    </div>
-
-    <div id="manualInputSection" class="manual-fields">
-        <div><label>Reg</label><input type="number" id="manualReg" placeholder="0"></div>
-        <div><label>OT</label><input type="number" id="manualOT" placeholder="0"></div>
-        <div><label>DT</label><input type="number" id="manualDT" placeholder="0"></div>
-    </div>
-
-    <button class="btn" onclick="saveShift()">Save Shift</button>
+<div class="tab-buttons">
+    <button id="tabShiftsBtn" class="active" onclick="showTab('shifts')">Shifts & Pay</button>
+    <button id="tabBankBtn" class="inactive" onclick="showTab('bank')">Bank/Sick Requests</button>
 </div>
 
-<!-- Weekly Net Pay Estimator -->
-<div class="card card-dark">
-    <h2>Weekly Net Pay Estimator</h2>
-    <label>Hourly Rate ($)</label>
-    <input type="number" id="baseRate" value="25.75">
-    <button class="btn btn-calc" onclick="updateUI()">Calculate Weekly Net</button>
-    <div id="paySummary" style="font-size: 0.95rem; margin-top: 15px; border-top: 1px solid rgba(255,255,255,0.3); padding-top: 12px;">
-        Results will appear here...
+<!-- Shifts & Pay Section -->
+<div id="shifts" style="display:block;">
+
+    <div class="card">
+        <h2>Log New Shift</h2>
+
+        <label>Date</label>
+        <input type="date" id="dateInput">
+
+        <label>Truck Number</label>
+        <select id="truckNum">
+            <option value="">Select Truck</option>
+            <script>
+                for(let i=1;i<=15;i++){
+                    document.write(`<option value="${i}">${i}</option>`);
+                }
+            </script>
+        </select>
+
+        <div style="margin:10px 0; font-size:0.9rem; display:flex; align-items:center; gap:8px;">
+            <strong>Manual Entry</strong>
+            <input type="checkbox" id="manualToggle" onchange="toggleManual()">
+        </div>
+
+        <div id="autoInputSection">
+            <label>Total Hours Worked</label>
+            <input type="number" id="hoursInput" step="0.25" placeholder="0.00">
+        </div>
+
+        <div id="manualInputSection" class="manual-fields">
+            <div><label>Reg</label><input type="number" id="manualReg" placeholder="0"></div>
+            <div><label>OT</label><input type="number" id="manualOT" placeholder="0"></div>
+            <div><label>DT</label><input type="number" id="manualDT" placeholder="0"></div>
+        </div>
+
+        <button class="btn" onclick="saveShift()">Save Shift</button>
     </div>
+
+    <div class="card" style="background:#2c3e50; color:white;">
+        <h2>Weekly Net Pay Estimator</h2>
+        <div id="paySummary" style="font-size:0.9rem; margin-top:15px; border-top:1px solid #555; padding-top:10px;">
+            Results will appear here...
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>History (Last 7 Shifts)</h2>
+        <div id="historyList"></div>
+    </div>
+
 </div>
 
-<!-- Weekly Hours Graph -->
-<div class="card">
-    <h2>Weekly Hours Graph</h2>
-    <div style="display:flex; justify-content: space-around; margin-bottom:10px; font-size:0.9rem; flex-wrap:wrap;">
-        <div style="display:flex; align-items:center; gap:4px;"><div style="width:14px;height:14px;background:#2980b9;border-radius:3px;"></div> Regular</div>
-        <div style="display:flex; align-items:center; gap:4px;"><div style="width:14px;height:14px;background:orange;border-radius:3px;"></div> OT</div>
-        <div style="display:flex; align-items:center; gap:4px;"><div style="width:14px;height:14px;background:#e74c3c;border-radius:3px;"></div> DT</div>
-    </div>
-    <div id="graphContainer" class="bar-graph"></div>
-</div>
+<!-- Bank/Sick Requests Section -->
+<div id="bank" style="display:none;">
+    <div class="card">
+        <h2>Bank Hours / Sick Requests</h2>
+        <label>Banked Hours:</label>
+        <input type="number" id="bankHours" placeholder="0">
 
-<!-- History -->
-<div class="card">
-    <h2>History (Last 7 Shifts)</h2>
-    <div id="historyList"></div>
+        <label>Sick Days:</label>
+        <input type="number" id="sickDays" placeholder="0">
+
+        <label>Request Message:</label>
+        <textarea id="requestMsg" rows="4" placeholder="Enter your request"></textarea>
+
+        <button class="btn" onclick="sendRequest()">Send to Supervisor</button>
+    </div>
 </div>
 
 <script>
 let history = JSON.parse(localStorage.getItem('trucker_history')) || [];
-
 document.getElementById('dateInput').valueAsDate = new Date();
-updateUI();
 
-function toggleManual(){
-    const isManual = document.getElementById('manualToggle').checked;
-    document.getElementById('autoInputSection').style.display = isManual ? 'none' : 'block';
-    document.getElementById('manualInputSection').style.display = isManual ? 'grid' : 'none';
+// Tab functionality
+function showTab(tab){
+    if(tab==='shifts'){
+        document.getElementById('shifts').style.display='block';
+        document.getElementById('bank').style.display='none';
+        document.getElementById('tabShiftsBtn').classList.add('active');
+        document.getElementById('tabShiftsBtn').classList.remove('inactive');
+        document.getElementById('tabBankBtn').classList.remove('active');
+        document.getElementById('tabBankBtn').classList.add('inactive');
+    } else {
+        document.getElementById('shifts').style.display='none';
+        document.getElementById('bank').style.display='block';
+        document.getElementById('tabShiftsBtn').classList.remove('active');
+        document.getElementById('tabShiftsBtn').classList.add('inactive');
+        document.getElementById('tabBankBtn').classList.add('active');
+        document.getElementById('tabBankBtn').classList.remove('inactive');
+    }
 }
 
+// Manual entry toggle
+function toggleManual(){
+    const isManual = document.getElementById('manualToggle').checked;
+    document.getElementById('autoInputSection').style.display = isManual ? 'none':'block';
+    document.getElementById('manualInputSection').style.display = isManual ? 'grid':'none';
+}
+
+// Save shift
 function saveShift(){
     const date = document.getElementById('dateInput').value;
-    const truckNum = document.getElementById('truckNumber').value;
+    const truckNum = document.getElementById('truckNum').value;
+    if(!truckNum) return alert("Select Truck Number");
+
     const isManual = document.getElementById('manualToggle').checked;
     let reg=0, ot=0, dt=0, total=0;
 
@@ -147,251 +247,80 @@ function saveShift(){
         total = reg+ot+dt;
     } else {
         total = parseFloat(document.getElementById('hoursInput').value)||0;
-        if(total>9){ reg=9; ot=total-9; } else { reg=total; ot=0; }
+        if(total>9){ reg=9; ot=total-9; dt=0; } else { reg=total; ot=0; dt=0; }
     }
 
     if(total===0) return alert("Enter hours");
-
     history.unshift({date, truckNum, reg, ot, dt, total});
+    if(history.length>7) history.pop();
     localStorage.setItem('trucker_history', JSON.stringify(history));
     updateUI();
 
-    document.getElementById('hoursInput').value = "";
-    document.getElementById('manualReg').value = "";
-    document.getElementById('manualOT').value = "";
-    document.getElementById('manualDT').value = "";
+    document.getElementById('hoursInput').value='';
+    document.getElementById('manualReg').value='';
+    document.getElementById('manualOT').value='';
+    document.getElementById('manualDT').value='';
+    document.getElementById('truckNum').value='';
 }
 
-function deleteShift(index){
-    if(confirm("Delete this shift?")){
-        history.splice(index,1);
-        localStorage.setItem('trucker_history', JSON.stringify(history));
-        updateUI();
-    }
+// Remove individual shift
+function removeShift(index){
+    history.splice(index,1);
+    localStorage.setItem('trucker_history', JSON.stringify(history));
+    updateUI();
 }
 
+// Update UI and pay calculator
 function updateUI(){
     const list = document.getElementById('historyList');
-    list.innerHTML = "";
-    let wReg=0,wOT=0,wDT=0,totalH=0;
+    list.innerHTML='';
+    let wReg=0,wOT=0,wDT=0;
 
-    const graphContainer = document.getElementById('graphContainer');
-    graphContainer.innerHTML = "";
-
-    history.slice(0,7).forEach((s,i)=>{
-        totalH+=s.total; wReg+=s.reg; wOT+=s.ot; wDT+=s.dt;
-
-        list.innerHTML+=`<div class="history-item">
-            <div>${s.date} (Truck ${s.truckNum}): ${s.total.toFixed(2)}h <br>R:${s.reg} | OT:${s.ot} | DT:${s.dt}</div>
-            <button class="btn-sm" style="background:#e74c3c;" onclick="deleteShift(${i})">Delete</button>
+    history.forEach((s,i)=>{
+        list.innerHTML+=`
+        <div class="history-item">
+            <div><strong>${s.date}</strong> | Truck ${s.truckNum}<br>R:${s.reg} | OT:${s.ot} | D:${s.dt}</div>
+            <button class="btn-sm" style="background:${'#e74c3c'};" onclick="removeShift(${i})">Remove</button>
         </div>`;
-
-        const bar=document.createElement('div'); bar.className='bar';
-        if(s.reg>0){const r=document.createElement('div');r.className='reg';r.style.height=(s.reg*8)+'px';r.textContent=s.reg.toFixed(0);bar.appendChild(r);}
-        if(s.ot>0){const o=document.createElement('div');o.className='ot';o.style.height=(s.ot*8)+'px';o.textContent=s.ot.toFixed(0);bar.appendChild(o);}
-        if(s.dt>0){const d=document.createElement('div');d.className='dt';d.style.height=(s.dt*8)+'px';d.textContent=s.dt.toFixed(0);bar.appendChild(d);}
-        graphContainer.appendChild(bar);
+        wReg+=s.reg; wOT+=s.ot; wDT+=s.dt;
     });
 
-    const rate=parseFloat(document.getElementById('baseRate').value)||25.75;
-    if(rate>0){
-        const gross=(wReg*rate)+(wOT*rate*1.5)+(wDT*rate*2);
-        const union = gross*0.025;
-        const cpp = gross*0.0595;
-        const ei = gross*0.0163;
+    const rate=25.75;
+    const gross=(wReg*rate)+(wOT*rate*1.5)+(wDT*rate*2);
 
-        // NL tax brackets (weekly)
-        const weeklyIncome = gross;
-        let tax = 0;
-        if(weeklyIncome <= 47500/52) tax = weeklyIncome*0.087;
-        else if(weeklyIncome <= 95000/52) tax = (47500/52)*0.087 + (weeklyIncome-47500/52)*0.145;
-        else if(weeklyIncome <= 147000/52) tax = (47500/52)*0.087 + (95000/52-47500/52)*0.145 + (weeklyIncome-95000/52)*0.158;
-        else tax = (47500/52)*0.087 + (95000/52-47500/52)*0.145 + (147000/52-95000/52)*0.158 + (weeklyIncome-147000/52)*0.173;
+    // Newfoundland tax and CPP/EI
+    const federalRate = 0.15;
+    const provincialRate = 0.087;
+    const cppRate = 0.057;
+    const eiRate = 0.016;
 
-        const net = gross - union - cpp - ei - tax;
+    const taxAmount = gross*(federalRate+provincialRate);
+    const cpp = gross*cppRate;
+    const ei = gross*eiRate;
+    const net = gross-taxAmount-cpp-ei;
 
-        document.getElementById('paySummary').innerHTML=`
-            <strong>Total Hours:</strong> ${totalH.toFixed(2)}h<br>
-            <strong>Regular:</strong> ${wReg.toFixed(2)}h | <strong>OT:</strong> ${wOT.toFixed(2)}h | <strong>DT:</strong> ${wDT.toFixed(2)}h<br>
-            <strong>Weekly Gross:</strong> $${gross.toFixed(2)}<br>
-            <strong>Union (2.5%) + CPP (5.95%) + EI (1.63%) + NL Tax:</strong> -$${(union+cpp+ei+tax).toFixed(2)}<br>
-            <hr style="border:0; border-top:1px solid rgba(0,0,0,0.1);">
-            <strong style="color:#27ae60; font-size:1.1rem;">Net Take-Home: $${net.toFixed(2)}</strong>
-        `;
-    }
+    document.getElementById('paySummary').innerHTML=`
+        <strong>Weekly Gross:</strong> $${gross.toFixed(2)}<br>
+        <strong>Federal+Prov Tax:</strong> -$${taxAmount.toFixed(2)}<br>
+        <strong>CPP:</strong> -$${cpp.toFixed(2)}<br>
+        <strong>EI:</strong> -$${ei.toFixed(2)}<br>
+        <hr style="border:0; border-top:1px solid #555;">
+        <strong style="color:#27ae60; font-size:1.1rem;">Net Take-Home: $${net.toFixed(2)}</strong>
+    `;
 }
-</script>
-</body>
-</html>.manual-fields { display: none; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-top: 12px; }
 
-.bar-graph { display:flex; justify-content: space-between; margin-bottom:15px; gap:6px; }
-.bar { flex:1; display:flex; flex-direction: column-reverse; align-items:center; justify-content:flex-start; border-radius:6px; background:#eee; position:relative; overflow:hidden; }
-.bar div { width:100%; position:absolute; bottom:0; text-align:center; color:white; font-size:0.7rem; font-weight:bold; border-radius:6px 6px 0 0; }
-.bar .reg { background: var(--accent); }
-.bar .ot { background: orange; }
-.bar .dt { background: var(--danger); }
-
-@media (max-width: 600px) {
-    .manual-fields { grid-template-columns: 1fr; }
-    input, select { font-size: 1.05rem; padding: 16px; }
-    .btn { font-size: 1.1rem; padding: 16px; }
+// Send bank/sick request via mailto
+function sendRequest(){
+    const bank = document.getElementById('bankHours').value || 0;
+    const sick = document.getElementById('sickDays').value || 0;
+    const msg = document.getElementById('requestMsg').value || '';
+    const subject = encodeURIComponent('Bank/Sick Request');
+    const body = encodeURIComponent(`Banked Hours: ${bank}\nSick Days: ${sick}\nMessage: ${msg}`);
+    window.location.href = `mailto:supervisor@example.com?subject=${subject}&body=${body}`;
 }
-</style>
-</head>
-<body>
 
-<h1>🚛 TruckLog NL Pro</h1>
-
-<!-- Log New Shift (Reverted Layout) -->
-<div class="card">
-    <h2>Log New Shift</h2>
-    <label>Date</label>
-    <input type="date" id="dateInput">
-
-    <label>Truck Number</label>
-    <select id="truckNumber">
-        <option value="1">1</option><option value="2">2</option><option value="3">3</option>
-        <option value="4">4</option><option value="5">5</option><option value="6">6</option>
-        <option value="7">7</option><option value="8">8</option><option value="9">9</option>
-        <option value="10">10</option><option value="11">11</option>
-        <option value="12">12</option><option value="13">13</option>
-        <option value="14">14</option><option value="15">15</option>
-    </select>
-
-    <div style="margin: 12px 0; font-size: 0.95rem; display:flex; align-items:center; gap:8px;">
-        <strong>Manual Entry</strong>
-        <input type="checkbox" id="manualToggle" onchange="toggleManual()">
-    </div>
-
-    <div id="autoInputSection">
-        <label>Total Hours Worked</label>
-        <input type="number" id="hoursInput" step="0.25" placeholder="0.00">
-    </div>
-
-    <div id="manualInputSection" class="manual-fields">
-        <div><label>Reg</label><input type="number" id="manualReg" placeholder="0"></div>
-        <div><label>OT</label><input type="number" id="manualOT" placeholder="0"></div>
-        <div><label>DT</label><input type="number" id="manualDT" placeholder="0"></div>
-    </div>
-
-    <button class="btn" onclick="saveShift()">Save Shift</button>
-</div>
-
-<!-- Weekly Net Pay Estimator -->
-<div class="card card-dark">
-    <h2>Weekly Net Pay Estimator</h2>
-    <label>Hourly Rate ($)</label>
-    <input type="number" id="baseRate" value="25.75">
-    <button class="btn btn-calc" onclick="updateUI()">Calculate Weekly Net</button>
-    <div id="paySummary" style="font-size: 0.95rem; margin-top: 15px; border-top: 1px solid rgba(255,255,255,0.3); padding-top: 12px;">
-        Results will appear here...
-    </div>
-</div>
-
-<!-- Weekly Hours Graph -->
-<div class="card">
-    <h2>Weekly Hours Graph</h2>
-    <div style="display:flex; justify-content: space-around; margin-bottom:10px; font-size:0.9rem; flex-wrap:wrap;">
-        <div style="display:flex; align-items:center; gap:4px;"><div style="width:14px;height:14px;background:#2980b9;border-radius:3px;"></div> Regular</div>
-        <div style="display:flex; align-items:center; gap:4px;"><div style="width:14px;height:14px;background:orange;border-radius:3px;"></div> OT</div>
-        <div style="display:flex; align-items:center; gap:4px;"><div style="width:14px;height:14px;background:#e74c3c;border-radius:3px;"></div> DT</div>
-    </div>
-    <div id="graphContainer" class="bar-graph"></div>
-</div>
-
-<!-- History -->
-<div class="card">
-    <h2>History (Last 7 Shifts)</h2>
-    <div id="historyList"></div>
-</div>
-
-<script>
-let history = JSON.parse(localStorage.getItem('trucker_history')) || [];
-
-document.getElementById('dateInput').valueAsDate = new Date();
 updateUI();
-
-function toggleManual(){
-    const isManual = document.getElementById('manualToggle').checked;
-    document.getElementById('autoInputSection').style.display = isManual ? 'none' : 'block';
-    document.getElementById('manualInputSection').style.display = isManual ? 'grid' : 'none';
-}
-
-function saveShift(){
-    const date = document.getElementById('dateInput').value;
-    const truckNum = document.getElementById('truckNumber').value;
-    const isManual = document.getElementById('manualToggle').checked;
-    let reg=0, ot=0, dt=0, total=0;
-
-    if(isManual){
-        reg = parseFloat(document.getElementById('manualReg').value)||0;
-        ot = parseFloat(document.getElementById('manualOT').value)||0;
-        dt = parseFloat(document.getElementById('manualDT').value)||0;
-        total = reg+ot+dt;
-    } else {
-        total = parseFloat(document.getElementById('hoursInput').value)||0;
-        if(total>9){ reg=9; ot=total-9; } else { reg=total; ot=0; }
-    }
-
-    if(total===0) return alert("Enter hours");
-
-    history.unshift({date, truckNum, reg, ot, dt, total});
-    localStorage.setItem('trucker_history', JSON.stringify(history));
-    updateUI();
-
-    document.getElementById('hoursInput').value = "";
-    document.getElementById('manualReg').value = "";
-    document.getElementById('manualOT').value = "";
-    document.getElementById('manualDT').value = "";
-}
-
-function deleteShift(index){
-    if(confirm("Delete this shift?")){
-        history.splice(index,1);
-        localStorage.setItem('trucker_history', JSON.stringify(history));
-        updateUI();
-    }
-}
-
-function updateUI(){
-    const list = document.getElementById('historyList');
-    list.innerHTML = "";
-    let wReg=0,wOT=0,wDT=0,totalH=0;
-
-    const graphContainer = document.getElementById('graphContainer');
-    graphContainer.innerHTML = "";
-
-    history.slice(0,7).forEach((s,i)=>{
-        totalH+=s.total; wReg+=s.reg; wOT+=s.ot; wDT+=s.dt;
-
-        list.innerHTML+=`<div class="history-item">
-            <div>${s.date} (Truck ${s.truckNum}): ${s.total.toFixed(2)}h <br>R:${s.reg} | OT:${s.ot} | DT:${s.dt}</div>
-            <button class="btn-sm" style="background:#e74c3c;" onclick="deleteShift(${i})">Delete</button>
-        </div>`;
-
-        const bar=document.createElement('div'); bar.className='bar';
-        if(s.reg>0){const r=document.createElement('div');r.className='reg';r.style.height=(s.reg*8)+'px';r.textContent=s.reg.toFixed(0);bar.appendChild(r);}
-        if(s.ot>0){const o=document.createElement('div');o.className='ot';o.style.height=(s.ot*8)+'px';o.textContent=s.ot.toFixed(0);bar.appendChild(o);}
-        if(s.dt>0){const d=document.createElement('div');d.className='dt';d.style.height=(s.dt*8)+'px';d.textContent=s.dt.toFixed(0);bar.appendChild(d);}
-        graphContainer.appendChild(bar);
-    });
-
-    const rate=parseFloat(document.getElementById('baseRate').value)||25.75;
-    if(rate>0){
-        const gross=(wReg*rate)+(wOT*rate*1.5)+(wDT*rate*2);
-        const union=gross*0.025;
-        const cppEi=gross*0.075;
-        const net=gross-union-cppEi;
-        document.getElementById('paySummary').innerHTML=`
-            <strong>Total Hours:</strong> ${totalH.toFixed(2)}h<br>
-            <strong>Regular:</strong> ${wReg.toFixed(2)}h | <strong>OT:</strong> ${wOT.toFixed(2)}h | <strong>DT:</strong> ${wDT.toFixed(2)}h<br>
-            <strong>Weekly Gross:</strong> $${gross.toFixed(2)}<br>
-            <strong>Union (2.5%) + CPP/EI (7.5%):</strong> -$${(union+cppEi).toFixed(2)}<br>
-            <hr style="border:0; border-top:1px solid rgba(0,0,0,0.1);">
-            <strong style="color:#27ae60; font-size:1.1rem;">Net Take-Home: $${net.toFixed(2)}</strong>
-        `;
-    }
-}
 </script>
+
 </body>
 </html>
