@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TruckLog NL Pro</title>
+<title>White Fleet Daily Log</title>
 <style>
 :root {
     --primary: #2c3e50;
@@ -54,9 +54,7 @@ input, select, textarea {
 
 textarea { resize: vertical; }
 
-button {
-    cursor: pointer;
-}
+button { cursor: pointer; }
 
 .btn {
     background: var(--secondary);
@@ -76,6 +74,287 @@ button {
     border-radius: 6px;
     border: none;
     cursor: pointer;
+    color: white;
+}
+
+.tab-buttons {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.tab-buttons button {
+    flex: 1;
+    padding: 12px;
+    font-weight: bold;
+    border-radius: 8px;
+    border: none;
+    color: white;
+}
+
+.tab-buttons button.active { background: var(--primary); }
+.tab-buttons button.inactive { background: #7f8c8d; }
+
+.history-item {
+    border-left: 4px solid var(--accent);
+    padding: 12px;
+    margin-bottom: 10px;
+    background: #fafafa;
+    font-size: 0.85rem;
+    border-radius: 0 8px 8px 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.manual-fields {
+    display: none;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 8px;
+    margin-top: 12px;
+}
+
+@media (max-width:600px){
+    .manual-fields { grid-template-columns: 1fr; }
+    input, select, textarea { font-size:1.05rem; padding:16px; }
+    .btn { font-size:1.1rem; padding:16px; }
+}
+</style>
+</head>
+<body>
+
+<!-- Header with logo -->
+<div style="display:flex; align-items:center; gap:12px; margin-bottom:20px; justify-content:center;">
+    <!-- Replace URL with your actual Oceanex logo -->
+    <img src="https://raw.githubusercontent.com/yourUsername/yourRepo/main/oceanex-logo.png"
+         alt="Oceanex Logo"
+         style="height:48px; width:auto;">
+    <h1 style="margin:0; font-size:2rem; color:var(--primary);">White Fleet Daily Log</h1>
+</div>
+
+<!-- Tabs -->
+<div class="tab-buttons">
+    <button id="tabShiftsBtn" class="active" onclick="showTab('shifts')">Shifts & Pay</button>
+    <button id="tabBankBtn" class="inactive" onclick="showTab('bank')">Bank/Sick Requests</button>
+</div>
+
+<!-- Shifts & Pay Section -->
+<div id="shifts" style="display:block;">
+
+    <div class="card">
+        <h2>Log New Shift</h2>
+
+        <label>Date</label>
+        <input type="date" id="dateInput">
+
+        <label>Truck Number</label>
+        <select id="truckNum">
+            <option value="">Select Truck</option>
+            <script>
+                for(let i=1;i<=15;i++){
+                    document.write(`<option value="${i}">${i}</option>`);
+                }
+            </script>
+        </select>
+
+        <div style="margin:10px 0; font-size:0.9rem; display:flex; align-items:center; gap:8px;">
+            <strong>Manual Entry</strong>
+            <input type="checkbox" id="manualToggle" onchange="toggleManual()">
+        </div>
+
+        <div id="autoInputSection">
+            <label>Total Hours Worked</label>
+            <input type="number" id="hoursInput" step="0.25" placeholder="0.00">
+        </div>
+
+        <div id="manualInputSection" class="manual-fields">
+            <div><label>Reg</label><input type="number" id="manualReg" placeholder="0"></div>
+            <div><label>OT</label><input type="number" id="manualOT" placeholder="0"></div>
+            <div><label>DT</label><input type="number" id="manualDT" placeholder="0"></div>
+        </div>
+
+        <button class="btn" onclick="saveShift()">Save Shift</button>
+    </div>
+
+    <div class="card" style="background:#2c3e50; color:white;">
+        <h2>Weekly Net Pay Estimator</h2>
+        <div id="paySummary" style="font-size:0.9rem; margin-top:15px; border-top:1px solid #555; padding-top:10px;">
+            Results will appear here...
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>History (Last 7 Shifts)</h2>
+        <div id="historyList"></div>
+    </div>
+
+</div>
+
+<!-- Bank/Sick Requests Section -->
+<div id="bank" style="display:none;">
+    <div class="card">
+        <h2>Bank/Sick Requests</h2>
+
+        <label>Total Bank Hours (Manual + Requests)</label>
+        <input type="number" id="bankTotalInput" value="0" oninput="updateBankUI()">
+
+        <label>Total Sick Days (Manual + Requests)</label>
+        <input type="number" id="sickTotalInput" value="0" oninput="updateBankUI()">
+
+        <label>Week Ending</label>
+        <input type="date" id="weekEnding">
+
+        <label>Bank Hours Requested</label>
+        <input type="number" id="bankHoursInput" placeholder="0">
+
+        <label>Sick Days Requested</label>
+        <input type="number" id="sickDaysInput" placeholder="0">
+
+        <label>Optional Message</label>
+        <textarea id="requestMsg" rows="3" placeholder="Enter your request"></textarea>
+
+        <button class="btn" onclick="addBankEntry()">Add Entry</button>
+
+        <h3 style="margin-top:15px;">Request History</h3>
+        <div id="bankHistory"></div>
+
+        <button class="btn" style="background:#2980b9; margin-top:10px;" onclick="sendRequest()">Send to Supervisor</button>
+    </div>
+</div>
+
+<script>
+// Tabs
+function showTab(tab){
+    if(tab==='bank'){
+        document.getElementById('shifts').style.display='none';
+        document.getElementById('bank').style.display='block';
+        document.getElementById('tabShiftsBtn').classList.remove('active'); document.getElementById('tabShiftsBtn').classList.add('inactive');
+        document.getElementById('tabBankBtn').classList.add('active'); document.getElementById('tabBankBtn').classList.remove('inactive');
+        setDefaultWeekEnding();
+    } else {
+        document.getElementById('shifts').style.display='block';
+        document.getElementById('bank').style.display='none';
+        document.getElementById('tabShiftsBtn').classList.add('active'); document.getElementById('tabShiftsBtn').classList.remove('inactive');
+        document.getElementById('tabBankBtn').classList.remove('active'); document.getElementById('tabBankBtn').classList.add('inactive');
+    }
+}
+
+// Default Week Ending = next Saturday
+function setDefaultWeekEnding(){
+    const today = new Date();
+    const day = today.getDay();
+    const diff = 6 - day;
+    const saturday = new Date(today);
+    saturday.setDate(today.getDate() + (diff >=0 ? diff : diff+7));
+    document.getElementById('weekEnding').value = saturday.toISOString().split("T")[0];
+}
+
+// Manual toggle
+function toggleManual(){
+    const isManual = document.getElementById('manualToggle').checked;
+    document.getElementById('autoInputSection').style.display = isManual ? 'none':'block';
+    document.getElementById('manualInputSection').style.display = isManual ? 'grid':'none';
+}
+
+// Shift history
+let history = JSON.parse(localStorage.getItem('trucker_history')) || [];
+document.getElementById('dateInput').valueAsDate = new Date();
+
+// Bank/Sick history
+let bankHistory = JSON.parse(localStorage.getItem('trucker_bank_history')) || [];
+
+// Save shift
+function saveShift(){
+    const date = document.getElementById('dateInput').value;
+    const truckNum = document.getElementById('truckNum').value;
+    if(!truckNum) return alert("Select Truck Number");
+    const isManual = document.getElementById('manualToggle').checked;
+    let reg=0,ot=0,dt=0,total=0;
+    if(isManual){ reg=parseFloat(document.getElementById('manualReg').value)||0; ot=parseFloat(document.getElementById('manualOT').value)||0; dt=parseFloat(document.getElementById('manualDT').value)||0; total=reg+ot+dt; }
+    else { total=parseFloat(document.getElementById('hoursInput').value)||0; if(total>9){ reg=9; ot=total-9; dt=0;} else { reg=total; ot=0; dt=0; } }
+    if(total===0) return alert("Enter hours");
+    history.unshift({date, truckNum, reg, ot, dt, total});
+    if(history.length>7) history.pop();
+    localStorage.setItem('trucker_history', JSON.stringify(history));
+    document.getElementById('hoursInput').value=''; document.getElementById('manualReg').value=''; document.getElementById('manualOT').value=''; document.getElementById('manualDT').value=''; document.getElementById('truckNum').value='';
+    updateUI();
+}
+
+// Remove shift
+function removeShift(index){ history.splice(index,1); localStorage.setItem('trucker_history', JSON.stringify(history)); updateUI(); }
+
+// Update Shifts UI
+function updateUI(){
+    const list=document.getElementById('historyList');
+    list.innerHTML='';
+    let wReg=0,wOT=0,wDT=0;
+    history.forEach((s,i)=>{
+        list.innerHTML+=`<div class="history-item"><div><strong>${s.date}</strong> | Truck ${s.truckNum}<br>R:${s.reg} | OT:${s.ot} | D:${s.dt}</div><button class="btn-sm" style="background:#e74c3c;" onclick="removeShift(${i})">Remove</button></div>`;
+        wReg+=s.reg; wOT+=s.ot; wDT+=s.dt;
+    });
+    const rate=25.75;
+    const gross=(wReg*rate)+(wOT*rate*1.5)+(wDT*rate*2);
+    const federalRate = 0.15;
+    const provincialRate = 0.087;
+    const cppRate = 0.057;
+    const eiRate = 0.016;
+    const taxAmount = gross*(federalRate+provincialRate);
+    const cpp = gross*cppRate;
+    const ei = gross*eiRate;
+    const net = gross-taxAmount-cpp-ei;
+    document.getElementById('paySummary').innerHTML=`
+        <strong>Weekly Gross:</strong> $${gross.toFixed(2)}<br>
+        <strong>Federal+Prov Tax:</strong> -$${taxAmount.toFixed(2)}<br>
+        <strong>CPP:</strong> -$${cpp.toFixed(2)}<br>
+        <strong>EI:</strong> -$${ei.toFixed(2)}<br>
+        <hr style="border:0; border-top:1px solid #555;">
+        <strong style="color:#27ae60; font-size:1.1rem;">Net Take-Home: $${net.toFixed(2)}</strong>
+    `;
+}
+
+// Bank/Sick Requests
+function addBankEntry(){
+    const weekEnding=document.getElementById('weekEnding').value;
+    const bankHrs=parseFloat(document.getElementById('bankHoursInput').value)||0;
+    const sickDays=parseFloat(document.getElementById('sickDaysInput').value)||0;
+    const msg=document.getElementById('requestMsg').value||'';
+    if(!weekEnding) return alert("Select Week Ending");
+    bankHistory.unshift({weekEnding, bankHrs, sickDays, msg});
+    localStorage.setItem('trucker_bank_history', JSON.stringify(bankHistory));
+    document.getElementById('bankHoursInput').value=''; document.getElementById('sickDaysInput').value=''; document.getElementById('requestMsg').value=''; document.getElementById('weekEnding').value='';
+    updateBankUI();
+}
+
+function removeBankEntry(index){ bankHistory.splice(index,1); localStorage.setItem('trucker_bank_history', JSON.stringify(bankHistory)); updateBankUI(); }
+
+function updateBankUI(){
+    let autoBank=0, autoSick=0;
+    const list=document.getElementById('bankHistory'); list.innerHTML='';
+    bankHistory.forEach((b,i)=>{
+        autoBank+=b.bankHrs; autoSick+=b.sickDays;
+        list.innerHTML+=`<div class="history-item"><div><strong>Week Ending:</strong> ${b.weekEnding}<br>Bank Hours: ${b.bankHrs} | Sick Days: ${b.sickDays}<br>${b.msg}</div><button class="btn-sm" style="background:#e74c3c;" onclick="removeBankEntry(${i})">Remove</button></div>`;
+    });
+    const manualBank=parseFloat(document.getElementById('bankTotalInput').value)||0;
+    const manualSick=parseFloat(document.getElementById('sickTotalInput').value)||0;
+    document.getElementById('bankTotal').innerText=(autoBank+manualBank).toFixed(2);
+    document.getElementById('sickTotal').innerText=(autoSick+manualSick).toFixed(2);
+}
+
+function sendRequest(){
+    if(bankHistory.length===0) return alert("No entries to send");
+    let bodyText='';
+    bankHistory.forEach(b=>{ bodyText+=`Week Ending: ${b.weekEnding}\nBank Hours: ${b.bankHrs}\nSick Days: ${b.sickDays}\nMessage: ${b.msg}\n\n`; });
+    const subject=encodeURIComponent("Bank/Sick Requests");
+    const body=encodeURIComponent(bodyText);
+    window.location.href=`mailto:supervisor@example.com?subject=${subject}&body=${body}`;
+}
+
+// Initialize
+updateUI(); updateBankUI(); setDefaultWeekEnding();
+</script>
+
+</body>
+</html>    cursor: pointer;
     color: white;
 }
 
