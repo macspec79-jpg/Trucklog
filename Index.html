@@ -1,0 +1,188 @@
+index.html<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TruckerLog NL</title>
+    <style>
+        :root { --primary: #2c3e50; --secondary: #27ae60; --accent: #2980b9; --bg: #f4f7f6; --danger: #e74c3c; }
+        body { font-family: -apple-system, system-ui, sans-serif; background: var(--bg); margin: 0; padding: 15px; padding-bottom: 50px; }
+        .card { background: white; padding: 15px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 15px; }
+        h2 { margin: 0 0 15px 0; font-size: 1.1rem; color: var(--primary); border-bottom: 2px solid #eee; padding-bottom: 5px; }
+        label { display: block; margin: 10px 0 5px; font-weight: bold; font-size: 0.8rem; color: #555; }
+        input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 1rem; margin-bottom: 5px; }
+        .btn { background: var(--secondary); color: white; border: none; padding: 15px; width: 100%; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 10px; }
+        .btn-calc { background: var(--primary); }
+        .btn-sm { padding: 8px 12px; margin: 2px; font-size: 0.9rem; border-radius: 6px; border: none; cursor: pointer; color: white; }
+        .history-item { border-left: 4px solid var(--accent); padding: 12px; margin-bottom: 10px; background: #fafafa; font-size: 0.85rem; border-radius: 0 8px 8px 0; }
+        .stats { display: flex; justify-content: space-between; gap: 10px; }
+        .stat-box { flex: 1; background: #eef2f3; padding: 10px; border-radius: 8px; text-align: center; }
+        .control-btns { margin-top: 8px; display: flex; justify-content: center; gap: 5px; }
+        .manual-fields { display: none; grid-template-columns: 1fr 1fr 1fr; gap: 5px; margin-top: 10px; }
+    </style>
+</head>
+<body>
+
+    <div class="card">
+        <h2>Dashboard</h2>
+        <div class="stats">
+            <div class="stat-box">
+                <strong>Banked Hrs</strong><br><span id="bankTotal">0</span>h
+                <div class="control-btns">
+                    <button class="btn-sm" style="background:var(--danger)" onclick="adjustBank(-1)">-1</button>
+                    <button class="btn-sm" style="background:var(--secondary)" onclick="adjustBank(1)">+1</button>
+                </div>
+            </div>
+            <div class="stat-box">
+                <strong>Sick Days</strong><br><span id="sickTotal">0</span>
+                <div class="control-btns">
+                    <button class="btn-sm" style="background:var(--danger)" onclick="adjustSick(-0.5)">-0.5</button>
+                    <button class="btn-sm" style="background:var(--secondary)" onclick="adjustSick(0.5)">+0.5</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card" style="background: #2c3e50; color: white;">
+        <h2>Weekly Net Pay Estimator</h2>
+        <div style="display: grid; grid-template-columns: 1.5fr 1fr; gap: 10px;">
+            <div>
+                <label style="color: white;">Hourly Rate ($)</label>
+                <input type="number" id="baseRate" placeholder="30.00">
+            </div>
+            <div>
+                <label style="color: white;">Tax Rate (%)</label>
+                <input type="number" id="taxRate" value="25">
+            </div>
+        </div>
+        <button class="btn btn-calc" onclick="updateUI()">Calculate Weekly Net</button>
+        
+        <div id="paySummary" style="font-size: 0.9rem; margin-top: 15px; border-top: 1px solid #555; padding-top: 10px;">
+            Results will appear here...
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>Log New Shift</h2>
+        <label>Date</label>
+        <input type="date" id="dateInput">
+        <label>Shift Notes</label>
+        <input type="text" id="notesInput" placeholder="Truck # / Route">
+
+        <div style="margin: 10px 0; font-size: 0.9rem;">
+            <input type="checkbox" id="manualToggle" onchange="toggleManual()"> <strong>Manual Entry Override</strong>
+        </div>
+
+        <div id="autoInputSection">
+            <label>Total Hours Worked</label>
+            <input type="number" id="hoursInput" step="0.25" placeholder="0.00">
+        </div>
+
+        <div id="manualInputSection" class="manual-fields">
+            <div><label>Reg</label><input type="number" id="manualReg" placeholder="9"></div>
+            <div><label>OT</label><input type="number" id="manualOT" placeholder="0"></div>
+            <div><label>DT</label><input type="number" id="manualDT" placeholder="0"></div>
+        </div>
+
+        <button class="btn" onclick="saveShift()">Save Shift</button>
+    </div>
+
+    <div class="card">
+        <h2>History (Last 7 Shifts)</h2>
+        <div id="historyList"></div>
+        <button style="background:none; color:var(--danger); border:none; font-size:0.7rem; text-decoration:underline;" onclick="clearHistory()">Clear History</button>
+    </div>
+
+    <script>
+        let history = JSON.parse(localStorage.getItem('trucker_history')) || [];
+        let sickDays = parseFloat(localStorage.getItem('trucker_sick')) || 0;
+        let manualBankAdjustment = parseFloat(localStorage.getItem('trucker_bank_adj')) || 0;
+        
+        document.getElementById('dateInput').valueAsDate = new Date();
+        updateUI();
+
+        function toggleManual() {
+            const isManual = document.getElementById('manualToggle').checked;
+            document.getElementById('autoInputSection').style.display = isManual ? 'none' : 'block';
+            document.getElementById('manualInputSection').style.display = isManual ? 'grid' : 'none';
+        }
+
+        function adjustSick(val) {
+            sickDays = Math.max(0, sickDays + val);
+            localStorage.setItem('trucker_sick', sickDays);
+            updateUI();
+        }
+
+        function adjustBank(val) {
+            manualBankAdjustment += val;
+            localStorage.setItem('trucker_bank_adj', manualBankAdjustment);
+            updateUI();
+        }
+
+        function saveShift() {
+            const date = document.getElementById('dateInput').value;
+            const notes = document.getElementById('notesInput').value || "";
+            const isManual = document.getElementById('manualToggle').checked;
+            let reg = 0, ot = 0, dt = 0, total = 0;
+
+            if (isManual) {
+                reg = parseFloat(document.getElementById('manualReg').value) || 0;
+                ot = parseFloat(document.getElementById('manualOT').value) || 0;
+                dt = parseFloat(document.getElementById('manualDT').value) || 0;
+                total = reg + ot + dt;
+            } else {
+                total = parseFloat(document.getElementById('hoursInput').value) || 0;
+                if (total > 12) { reg = 9; ot = 3; dt = total - 12; }
+                else if (total > 9) { reg = 9; ot = total - 9; }
+                else { reg = total; }
+            }
+
+            if (total === 0) return alert("Enter hours");
+            history.unshift({ date, reg, ot, dt, total, notes });
+            localStorage.setItem('trucker_history', JSON.stringify(history));
+            updateUI();
+            
+            // Reset fields
+            document.getElementById('hoursInput').value = "";
+            document.getElementById('manualReg').value = "";
+            document.getElementById('manualOT').value = "";
+            document.getElementById('manualDT').value = "";
+            document.getElementById('notesInput').value = "";
+        }
+
+        function updateUI() {
+            const list = document.getElementById('historyList');
+            list.innerHTML = "";
+            let wReg = 0, wOT = 0, wDT = 0, totalH = 0;
+
+            history.slice(0, 7).forEach(s => {
+                totalH += s.total; wReg += s.reg; wOT += s.ot; wDT += s.dt;
+                list.innerHTML += `<div class="history-item"><strong>${s.date}</strong>: ${s.total.toFixed(2)}h<br><small>R:${s.reg} | OT:${s.ot} | D:${s.dt}</small> ${s.notes ? '<br><i>'+s.notes+'</i>' : ''}</div>`;
+            });
+
+            document.getElementById('bankTotal').innerText = (totalH + manualBankAdjustment).toFixed(2);
+            document.getElementById('sickTotal').innerText = sickDays;
+
+            // Simple Calculation
+            const rate = parseFloat(document.getElementById('baseRate').value) || 0;
+            const taxPerc = parseFloat(document.getElementById('taxRate').value) || 0;
+
+            if (rate > 0) {
+                const gross = (wReg * rate) + (wOT * rate * 1.5) + (wDT * rate * 2);
+                const taxAmount = gross * (taxPerc / 100);
+                const cppEi = gross * 0.075; // Est. CPP/EI
+                const net = gross - taxAmount - cppEi;
+
+                document.getElementById('paySummary').innerHTML = `
+                    <strong>Weekly Gross:</strong> $${gross.toFixed(2)}<br>
+                    <strong>Estimated Tax/CPP/EI:</strong> -$${(taxAmount + cppEi).toFixed(2)}<br>
+                    <hr style="border:0; border-top:1px solid #555;">
+                    <strong style="color:#27ae60; font-size:1.1rem;">Net Take-Home: $${net.toFixed(2)}</strong>
+                `;
+            }
+        }
+
+        function clearHistory() { if(confirm("Delete all shifts?")) { history = []; localStorage.setItem('trucker_history', JSON.stringify(history)); updateUI(); } }
+    </script>
+</body>
+</html>
