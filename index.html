@@ -1,272 +1,189 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>White Fleet Daily Log</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trucker Pro NL - 2026</title>
+    <style>
+        :root { --green: #00ff41; --bg: #121212; --card: #1e1e1e; --border: #333; --orange: #ff9800; }
+        body { font-family: -apple-system, sans-serif; background: var(--bg); color: #eee; padding: 10px; margin: 0; }
+        .card { background: var(--card); padding: 15px; border-radius: 12px; max-width: 600px; margin: auto; border: 1px solid var(--border); box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        
+        .top-info { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
+        .full-width { grid-column: span 2; margin-bottom: 15px; }
+        .top-info input, .top-info label { background: #000; border: 1px solid var(--border); color: var(--green); padding: 12px; border-radius: 8px; font-weight: bold; width: 100%; box-sizing: border-box; }
+        .date-label { font-size: 0.7em; color: #888; text-transform: uppercase; margin-bottom: 4px; display: block; }
 
-<link rel="manifest" href="manifest.json">
+        .day-block { background: #262626; border-radius: 8px; padding: 12px; margin-bottom: 12px; border-left: 4px solid #444; }
+        .day-header { font-weight: bold; color: var(--green); margin-bottom: 10px; display: flex; justify-content: space-between; font-size: 0.9em; }
+        .dt-highlight { border-left-color: var(--orange) !important; }
+        .dt-highlight .day-header { color: var(--orange); }
+        
+        .input-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 10px; }
+        .input-group { display: flex; flex-direction: column; text-align: center; }
+        .input-group label { font-size: 0.6em; color: #888; text-transform: uppercase; margin-bottom: 4px; }
+        
+        input[type="number"], input[type="date"], input[type="text"] { background: #000; border: 1px solid var(--border); color: var(--green); padding: 10px; border-radius: 6px; text-align: center; font-size: 1.1em; width: 100%; box-sizing: border-box; }
+        input[type="date"] { text-align: left; padding: 12px; }
+        .notes-input { background: #1a1a1a; border: 1px solid #333; color: #ccc; width: 100%; padding: 8px; border-radius: 4px; font-size: 0.8em; margin-top: 5px; box-sizing: border-box; text-align: left !important; }
 
-<style>
-:root {
-    --primary:#2c3e50;
-    --secondary:#27ae60;
-    --accent:#2980b9;
-    --bg:#f4f7f6;
-    --danger:#e74c3c;
-}
-
-body {
-    font-family:-apple-system,system-ui,sans-serif;
-    background:var(--bg);
-    margin:0;
-    padding:15px;
-}
-
-.dark {
-    --bg:#1e272e;
-    --primary:#ecf0f1;
-}
-
-.card {
-    background:white;
-    padding:15px;
-    border-radius:12px;
-    box-shadow:0 4px 6px rgba(0,0,0,0.05);
-    margin-bottom:15px;
-}
-
-.dark .card {
-    background:#2f3640;
-    color:white;
-}
-
-h1,h2 { margin:0 0 15px 0; }
-
-label { font-weight:bold; font-size:0.8rem; }
-
-input,select,textarea {
-    width:100%;
-    padding:12px;
-    border-radius:8px;
-    border:1px solid #ddd;
-    margin-bottom:8px;
-}
-
-button { cursor:pointer; }
-
-.btn {
-    background:var(--secondary);
-    color:white;
-    border:none;
-    padding:12px;
-    width:100%;
-    border-radius:8px;
-    margin-top:10px;
-}
-
-.history-item {
-    background:#fafafa;
-    padding:10px;
-    margin-bottom:8px;
-    border-left:4px solid var(--accent);
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    font-size:0.85rem;
-}
-
-.dark .history-item { background:#3d3d3d; }
-
-.btn-sm {
-    background:var(--danger);
-    color:white;
-    border:none;
-    padding:6px 10px;
-    border-radius:6px;
-}
-</style>
+        .summary { background: #000; padding: 15px; border-radius: 10px; margin-top: 20px; border: 1px solid var(--green); }
+        .line { display: flex; justify-content: space-between; margin: 6px 0; font-size: 0.85em; }
+        .tax-line { color: #ff5252; }
+        .total-hours-line { color: var(--green); font-weight: bold; border-bottom: 1px solid #222; padding-bottom: 8px; margin-bottom: 8px; }
+        .net-total { font-size: 1.7em; color: var(--green); font-weight: 900; border-top: 1px solid #333; padding-top: 10px; margin-top: 10px; }
+        
+        .btn-email { background: #007bff; color: white; border: none; padding: 18px; width: 100%; border-radius: 8px; font-weight: bold; margin-top: 15px; font-size: 1em; cursor: pointer; }
+        .btn-clear { background: transparent; color: #555; border: none; width: 100%; margin-top: 20px; cursor: pointer; font-size: 0.75em; text-decoration: underline; }
+    </style>
 </head>
 <body>
 
-<h1 style="text-align:center;">White Fleet Daily Log</h1>
-
 <div class="card">
-<h2>Settings</h2>
+    <div class="top-info">
+        <input type="text" id="driverName" placeholder="Driver Name" oninput="saveStatic()">
+        <input type="text" id="truckNum" placeholder="Truck/Unit #" oninput="saveStatic()">
+        <div class="full-width">
+            <label class="date-label">Week Ending (Saturday):</label>
+            <input type="date" id="weekEnding" oninput="saveStatic()">
+        </div>
+    </div>
+    
+    <div id="logContainer"></div>
 
-<label>Hourly Rate</label>
-<input type="number" id="rateInput" step="0.01" value="25.75">
+    <div class="summary">
+        <div class="line total-hours-line"><span>Weekly Total:</span> <span id="outTotalHrs">0.0 hrs</span></div>
+        <div class="line"><span>Gross Pay:</span> <span id="outGross">$0.00</span></div>
+        <div class="line tax-line"><span>Income Tax (NL/Fed):</span> <span id="outTax">-$0.00</span></div>
+        <div class="line tax-line"><span>CPP & EI (7.58%):</span> <span id="outCpp">-$0.00</span></div>
+        <div class="line tax-line"><span>Union & RRSP (7.5%):</span> <span id="outUnion">-$0.00</span></div>
+        <div class="line net-total"><span>Net Take Home:</span> <span id="outNet">$0.00</span></div>
+    </div>
 
-<label>Supervisor Email</label>
-<input type="email" id="supervisorEmail">
-
-<div>
-<input type="checkbox" id="autoBankToggle"> Auto Bank Overtime
-</div>
-
-<div>
-<input type="checkbox" id="darkModeToggle" onchange="toggleDarkMode()"> Dark Mode
-</div>
-</div>
-
-<div class="card">
-<h2>Log New Shift</h2>
-
-<label>Date</label>
-<input type="date" id="dateInput">
-
-<label>Truck Number</label>
-<select id="truckNum">
-<option value="">Select Truck</option>
-</select>
-
-<label>Total Hours</label>
-<input type="number" id="hoursInput" step="0.25">
-
-<button class="btn" onclick="saveShift()">Save Shift</button>
-</div>
-
-<div class="card" style="background:#2c3e50;color:white;">
-<h2>Weekly Net Pay Estimator</h2>
-<div id="paySummary">Results will appear here...</div>
-</div>
-
-<div class="card">
-<h2>History</h2>
-<div id="historyList"></div>
-<button class="btn" style="background:#e74c3c;" onclick="resetWeek()">Reset Week</button>
-<button class="btn" style="background:#2980b9;" onclick="exportCSV()">Export CSV</button>
+    <button class="btn-email" onclick="sendReport()">📧 Email Professional Report</button>
+    <button class="btn-clear" onclick="clearData()">Clear All Data</button>
 </div>
 
 <script>
+const RATE = 25.75;
+const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 
-// ---------- STORAGE ----------
-let history = JSON.parse(localStorage.getItem('trucker_history')) || [];
-let bankHistory = JSON.parse(localStorage.getItem('trucker_bank_history')) || [];
+function init() {
+    const container = document.getElementById('logContainer');
+    days.forEach(day => {
+        const isDTDay = (day === "Friday" || day === "Saturday") ? "dt-highlight" : "";
+        container.innerHTML += `
+            <div class="day-block ${isDTDay}">
+                <div class="day-header">${day}</div>
+                <div class="input-grid">
+                    <div class="input-group"><label>Reg</label><input type="number" class="val-reg" data-day="${day}" oninput="calc()"></div>
+                    <div class="input-group"><label>1.5x</label><input type="number" class="val-ot" data-day="${day}" oninput="calc()"></div>
+                    <div class="input-group"><label>2.0x</label><input type="number" class="val-dt" data-day="${day}" oninput="calc()"></div>
+                </div>
+                <input type="text" class="notes-input" placeholder="Notes (Delays, route, etc.)" oninput="calc()">
+            </div>`;
+    });
+    
+    const today = new Date();
+    const saturdayOffset = (6 - today.getDay() + 7) % 7;
+    const saturdayDate = new Date(today);
+    saturdayDate.setDate(today.getDate() + saturdayOffset);
+    document.getElementById('weekEnding').value = saturdayDate.toISOString().split('T')[0];
 
-// ---------- INITIAL ----------
-document.getElementById('dateInput').valueAsDate = new Date();
-
-const truckSelect = document.getElementById('truckNum');
-for (let i=1;i<=15;i++){
-    const opt=document.createElement("option");
-    opt.value=i;
-    opt.textContent=i;
-    truckSelect.appendChild(opt);
+    loadData();
 }
 
-loadSettings();
-updateUI();
-
-// ---------- SAVE SHIFT ----------
-function saveShift(){
-    const date=document.getElementById('dateInput').value;
-    const truck=document.getElementById('truckNum').value;
-    const total=parseFloat(document.getElementById('hoursInput').value)||0;
-    if(!truck||!total) return alert("Enter truck and hours");
-
-    let reg=0,ot=0;
-    if(total>9){ reg=9; ot=total-9; }
-    else reg=total;
-
-    history.unshift({date,truck,reg,ot,total});
-    if(history.length>7) history.pop();
-    localStorage.setItem('trucker_history',JSON.stringify(history));
-
-    if(document.getElementById('autoBankToggle').checked && ot>0){
-        bankHistory.unshift({weekEnding:date,bankHrs:ot});
-        localStorage.setItem('trucker_bank_history',JSON.stringify(bankHistory));
-    }
-
-    document.getElementById('hoursInput').value='';
-    updateUI();
-}
-
-// ---------- UPDATE UI ----------
-function updateUI(){
-    const list=document.getElementById('historyList');
-    list.innerHTML='';
-    let wReg=0,wOT=0;
-
-    history.forEach((s,i)=>{
-        list.innerHTML+=`
-        <div class="history-item">
-        <div><strong>${s.date}</strong> | Truck ${s.truck}<br>R:${s.reg} OT:${s.ot}</div>
-        <button class="btn-sm" onclick="removeShift(${i})">Remove</button>
-        </div>`;
-        wReg+=s.reg;
-        wOT+=s.ot;
+function calc() {
+    let gross = 0, totalHrs = 0;
+    const entries = [];
+    document.querySelectorAll('.day-block').forEach(block => {
+        const r = parseFloat(block.querySelector('.val-reg').value) || 0;
+        const o = parseFloat(block.querySelector('.val-ot').value) || 0;
+        const d = parseFloat(block.querySelector('.val-dt').value) || 0;
+        const note = block.querySelector('.notes-input').value;
+        totalHrs += (r + o + d);
+        gross += (r * RATE) + (o * RATE * 1.5) + (d * RATE * 2);
+        entries.push({r, o, d, note});
     });
 
-    const rate=parseFloat(document.getElementById('rateInput').value)||25.75;
-    const gross=(wReg*rate)+(wOT*rate*1.5);
+    localStorage.setItem('truckerHoursV4', JSON.stringify(entries));
 
-    const tax=gross*(0.15+0.087);
-    const cpp=gross*0.0595;
-    const ei=gross*0.0166;
-    const union=gross*0.025;
-    const net=gross-tax-cpp-ei-union;
+    const taxable = Math.max(0, gross - 530); 
+    const incomeTax = taxable * 0.227; 
+    const cppEi = gross * 0.0758;
+    const unionRRSP = gross * 0.075;
+    const net = gross - incomeTax - cppEi - unionRRSP;
 
-    document.getElementById('paySummary').innerHTML=`
-    Gross: $${gross.toFixed(2)}<br>
-    Tax: -$${tax.toFixed(2)}<br>
-    CPP: -$${cpp.toFixed(2)}<br>
-    EI: -$${ei.toFixed(2)}<br>
-    Union (2.5%): -$${union.toFixed(2)}<hr>
-    <strong style="color:#27ae60;">Net: $${net.toFixed(2)}</strong>`;
+    document.getElementById('outTotalHrs').innerText = totalHrs.toFixed(1) + " hrs";
+    document.getElementById('outGross').innerText = "$" + gross.toFixed(2);
+    document.getElementById('outTax').innerText = "-$" + incomeTax.toFixed(2);
+    document.getElementById('outCpp').innerText = "-$" + cppEi.toFixed(2);
+    document.getElementById('outUnion').innerText = "-$" + unionRRSP.toFixed(2);
+    document.getElementById('outNet').innerText = "$" + net.toFixed(2);
 }
 
-function removeShift(i){
-    history.splice(i,1);
-    localStorage.setItem('trucker_history',JSON.stringify(history));
-    updateUI();
+function saveStatic() {
+    localStorage.setItem('driverName', document.getElementById('driverName').value);
+    localStorage.setItem('truckNum', document.getElementById('truckNum').value);
+    localStorage.setItem('weekEnding', document.getElementById('weekEnding').value);
 }
 
-function resetWeek(){
-    if(confirm("Clear this week's shifts?")){
-        history=[];
-        localStorage.removeItem('trucker_history');
-        updateUI();
+function loadData() {
+    document.getElementById('driverName').value = localStorage.getItem('driverName') || "";
+    document.getElementById('truckNum').value = localStorage.getItem('truckNum') || "";
+    const savedDate = localStorage.getItem('weekEnding');
+    if (savedDate) document.getElementById('weekEnding').value = savedDate;
+    
+    const saved = localStorage.getItem('truckerHoursV4');
+    if (saved) {
+        const entries = JSON.parse(saved);
+        const blocks = document.querySelectorAll('.day-block');
+        entries.forEach((data, i) => {
+            if(blocks[i]) {
+                blocks[i].querySelector('.val-reg').value = data.r || "";
+                blocks[i].querySelector('.val-ot').value = data.o || "";
+                blocks[i].querySelector('.val-dt').value = data.d || "";
+                blocks[i].querySelector('.notes-input').value = data.note || "";
+            }
+        });
+        calc();
     }
 }
 
-function exportCSV(){
-    let csv="Date,Truck,Reg,OT,Total\n";
-    history.forEach(s=>{
-        csv+=`${s.date},${s.truck},${s.reg},${s.ot},${s.total}\n`;
+function clearData() {
+    if(confirm("Wipe all hours and notes?")) {
+        localStorage.removeItem('truckerHoursV4');
+        location.reload();
+    }
+}
+
+function sendReport() {
+    const driver = document.getElementById('driverName').value || "Driver";
+    const truck = document.getElementById('truckNum').value || "N/A";
+    const date = document.getElementById('weekEnding').value;
+    const totalHrs = document.getElementById('outTotalHrs').innerText;
+    
+    let body = `WEEKLY HOURS REPORT\n--------------------------\n`;
+    body += `Driver: ${driver}\nTruck #: ${truck}\nWeek Ending: ${date}\nTotal Hours: ${totalHrs}\n--------------------------\n\n`;
+    
+    document.querySelectorAll('.day-block').forEach(block => {
+        const d = block.querySelector('.day-header').innerText;
+        const r = block.querySelector('.val-reg').value || 0;
+        const o = block.querySelector('.val-ot').value || 0;
+        const dt = block.querySelector('.val-dt').value || 0;
+        const note = block.querySelector('.notes-input').value;
+        if(r > 0 || o > 0 || dt > 0) {
+            body += `${d}: ${r} Reg, ${o} OT, ${dt} Double\n`;
+            if(note) body += `   Note: ${note}\n`;
+        }
     });
-    const blob=new Blob([csv],{type:'text/csv'});
-    const a=document.createElement('a');
-    a.href=URL.createObjectURL(blob);
-    a.download="weekly_log.csv";
-    a.click();
+    
+    body += `\n--------------------------\nGross Total: ${document.getElementById('outGross').innerText}\nEst. Net Take Home: ${document.getElementById('outNet').innerText}`;
+    
+    const subject = `Hours Report - ${driver} - Truck ${truck} - W/E ${date}`;
+    window.location.href = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
 }
-
-// ---------- SETTINGS ----------
-function loadSettings(){
-    rateInput.value=localStorage.getItem('rate')||25.75;
-    supervisorEmail.value=localStorage.getItem('email')||'';
-    autoBankToggle.checked=localStorage.getItem('autoBank')==='true';
-    darkModeToggle.checked=localStorage.getItem('darkMode')==='true';
-    if(darkModeToggle.checked) document.body.classList.add("dark");
-}
-
-rateInput.oninput=saveSettings;
-supervisorEmail.oninput=saveSettings;
-autoBankToggle.onchange=saveSettings;
-darkModeToggle.onchange=saveSettings;
-
-function saveSettings(){
-    localStorage.setItem('rate',rateInput.value);
-    localStorage.setItem('email',supervisorEmail.value);
-    localStorage.setItem('autoBank',autoBankToggle.checked);
-    localStorage.setItem('darkMode',darkModeToggle.checked);
-}
-
-function toggleDarkMode(){
-    document.body.classList.toggle("dark");
-}
-
+init();
 </script>
 </body>
 </html>
