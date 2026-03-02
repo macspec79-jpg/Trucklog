@@ -9,23 +9,25 @@
         body { font-family: -apple-system, sans-serif; background: var(--bg); color: #eee; padding: 10px; margin: 0; }
         .card { background: var(--card); padding: 15px; border-radius: 12px; max-width: 600px; margin: auto; border: 1px solid var(--border); box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
         
-        .top-info { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
-        .full-width { grid-column: span 2; margin-bottom: 15px; }
+        .top-info { display: flex; flex-direction: column; gap: 10px; margin-bottom: 10px; }
         .top-info input, .top-info label { background: #000; border: 1px solid var(--border); color: var(--green); padding: 12px; border-radius: 8px; font-weight: bold; width: 100%; box-sizing: border-box; }
         .date-label { font-size: 0.7em; color: #888; text-transform: uppercase; margin-bottom: 4px; display: block; }
 
         .day-block { background: #262626; border-radius: 8px; padding: 12px; margin-bottom: 12px; border-left: 4px solid #444; }
-        .day-header { font-weight: bold; color: var(--green); margin-bottom: 10px; display: flex; justify-content: space-between; font-size: 0.9em; }
+        .day-header { font-weight: bold; color: var(--green); margin-bottom: 10px; display: flex; justify-content: space-between; font-size: 0.9em; align-items: center; }
+        
+        .unit-select { background: #000; border: 1px solid var(--green); color: var(--green); padding: 6px; border-radius: 4px; width: 90px; font-weight: bold; font-size: 0.9em; cursor: pointer; }
+        
         .dt-highlight { border-left-color: var(--orange) !important; }
         .dt-highlight .day-header { color: var(--orange); }
+        .dt-highlight .unit-select { border-color: var(--orange); color: var(--orange); }
         
         .input-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 10px; }
         .input-group { display: flex; flex-direction: column; text-align: center; }
         .input-group label { font-size: 0.6em; color: #888; text-transform: uppercase; margin-bottom: 4px; }
         
         input[type="number"], input[type="date"], input[type="text"] { background: #000; border: 1px solid var(--border); color: var(--green); padding: 10px; border-radius: 6px; text-align: center; font-size: 1.1em; width: 100%; box-sizing: border-box; }
-        input[type="date"] { text-align: left; padding: 12px; }
-        .notes-input { background: #1a1a1a; border: 1px solid #333; color: #ccc; width: 100%; padding: 8px; border-radius: 4px; font-size: 0.8em; margin-top: 5px; box-sizing: border-box; text-align: left !important; }
+        .notes-input { background: #1a1a1a; border: 1px solid #333; color: #ccc; width: 100%; padding: 8px; border-radius: 4px; font-size: 0.8em; margin-top: 5px; box-sizing: border-box; text-align: left; }
 
         .summary { background: #000; padding: 15px; border-radius: 10px; margin-top: 20px; border: 1px solid var(--green); }
         .line { display: flex; justify-content: space-between; margin: 6px 0; font-size: 0.85em; }
@@ -42,8 +44,7 @@
 <div class="card">
     <div class="top-info">
         <input type="text" id="driverName" placeholder="Driver Name" oninput="saveStatic()">
-        <input type="text" id="truckNum" placeholder="Truck/Unit #" oninput="saveStatic()">
-        <div class="full-width">
+        <div>
             <label class="date-label">Week Ending (Saturday):</label>
             <input type="date" id="weekEnding" oninput="saveStatic()">
         </div>
@@ -70,17 +71,28 @@ const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", 
 
 function init() {
     const container = document.getElementById('logContainer');
-    days.forEach(day => {
+    days.forEach((day, index) => {
         const isDTDay = (day === "Friday" || day === "Saturday") ? "dt-highlight" : "";
+        
+        let options = '<option value="N/A">Unit #</option>';
+        for(let i=1; i<=15; i++) {
+            options += `<option value="${i}">${i}</option>`;
+        }
+
         container.innerHTML += `
             <div class="day-block ${isDTDay}">
-                <div class="day-header">${day}</div>
-                <div class="input-grid">
-                    <div class="input-group"><label>Reg</label><input type="number" class="val-reg" data-day="${day}" oninput="calc()"></div>
-                    <div class="input-group"><label>1.5x</label><input type="number" class="val-ot" data-day="${day}" oninput="calc()"></div>
-                    <div class="input-group"><label>2.0x</label><input type="number" class="val-dt" data-day="${day}" oninput="calc()"></div>
+                <div class="day-header">
+                    <span>${day}</span>
+                    <select class="unit-select" onchange="calc()">
+                        ${options}
+                    </select>
                 </div>
-                <input type="text" class="notes-input" placeholder="Notes (Delays, route, etc.)" oninput="calc()">
+                <div class="input-grid">
+                    <div class="input-group"><label>Reg</label><input type="number" class="val-reg" oninput="calc()"></div>
+                    <div class="input-group"><label>1.5x</label><input type="number" class="val-ot" oninput="calc()"></div>
+                    <div class="input-group"><label>2.0x</label><input type="number" class="val-dt" oninput="calc()"></div>
+                </div>
+                <input type="text" class="notes-input" placeholder="Notes (Route, delays, etc.)" oninput="calc()">
             </div>`;
     });
     
@@ -100,13 +112,15 @@ function calc() {
         const r = parseFloat(block.querySelector('.val-reg').value) || 0;
         const o = parseFloat(block.querySelector('.val-ot').value) || 0;
         const d = parseFloat(block.querySelector('.val-dt').value) || 0;
+        const unit = block.querySelector('.unit-select').value;
         const note = block.querySelector('.notes-input').value;
+        
         totalHrs += (r + o + d);
         gross += (r * RATE) + (o * RATE * 1.5) + (d * RATE * 2);
-        entries.push({r, o, d, note});
+        entries.push({r, o, d, unit, note});
     });
 
-    localStorage.setItem('truckerHoursV4', JSON.stringify(entries));
+    localStorage.setItem('truckerHoursFinal', JSON.stringify(entries));
 
     const taxable = Math.max(0, gross - 530); 
     const incomeTax = taxable * 0.227; 
@@ -124,17 +138,15 @@ function calc() {
 
 function saveStatic() {
     localStorage.setItem('driverName', document.getElementById('driverName').value);
-    localStorage.setItem('truckNum', document.getElementById('truckNum').value);
     localStorage.setItem('weekEnding', document.getElementById('weekEnding').value);
 }
 
 function loadData() {
     document.getElementById('driverName').value = localStorage.getItem('driverName') || "";
-    document.getElementById('truckNum').value = localStorage.getItem('truckNum') || "";
     const savedDate = localStorage.getItem('weekEnding');
     if (savedDate) document.getElementById('weekEnding').value = savedDate;
     
-    const saved = localStorage.getItem('truckerHoursV4');
+    const saved = localStorage.getItem('truckerHoursFinal');
     if (saved) {
         const entries = JSON.parse(saved);
         const blocks = document.querySelectorAll('.day-block');
@@ -143,6 +155,7 @@ function loadData() {
                 blocks[i].querySelector('.val-reg').value = data.r || "";
                 blocks[i].querySelector('.val-ot').value = data.o || "";
                 blocks[i].querySelector('.val-dt').value = data.d || "";
+                blocks[i].querySelector('.unit-select').value = data.unit || "N/A";
                 blocks[i].querySelector('.notes-input').value = data.note || "";
             }
         });
@@ -151,36 +164,37 @@ function loadData() {
 }
 
 function clearData() {
-    if(confirm("Wipe all hours and notes?")) {
-        localStorage.removeItem('truckerHoursV4');
+    if(confirm("Wipe all hours, units, and notes?")) {
+        localStorage.removeItem('truckerHoursFinal');
         location.reload();
     }
 }
 
 function sendReport() {
     const driver = document.getElementById('driverName').value || "Driver";
-    const truck = document.getElementById('truckNum').value || "N/A";
     const date = document.getElementById('weekEnding').value;
     const totalHrs = document.getElementById('outTotalHrs').innerText;
     
     let body = `WEEKLY HOURS REPORT\n--------------------------\n`;
-    body += `Driver: ${driver}\nTruck #: ${truck}\nWeek Ending: ${date}\nTotal Hours: ${totalHrs}\n--------------------------\n\n`;
+    body += `Driver: ${driver}\nWeek Ending: ${date}\nTotal Hours: ${totalHrs}\n--------------------------\n\n`;
     
     document.querySelectorAll('.day-block').forEach(block => {
-        const d = block.querySelector('.day-header').innerText;
+        const d = block.querySelector('.day-header span').innerText;
+        const unit = block.querySelector('.unit-select').value;
         const r = block.querySelector('.val-reg').value || 0;
         const o = block.querySelector('.val-ot').value || 0;
         const dt = block.querySelector('.val-dt').value || 0;
         const note = block.querySelector('.notes-input').value;
+        
         if(r > 0 || o > 0 || dt > 0) {
-            body += `${d}: ${r} Reg, ${o} OT, ${dt} Double\n`;
+            body += `${d} (Unit #${unit}): ${r} Reg, ${o} OT, ${dt} Double\n`;
             if(note) body += `   Note: ${note}\n`;
         }
     });
     
     body += `\n--------------------------\nGross Total: ${document.getElementById('outGross').innerText}\nEst. Net Take Home: ${document.getElementById('outNet').innerText}`;
     
-    const subject = `Hours Report - ${driver} - Truck ${truck} - W/E ${date}`;
+    const subject = `Hours Report - ${driver} - W/E ${date}`;
     window.location.href = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
 }
 init();
