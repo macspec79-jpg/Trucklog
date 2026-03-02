@@ -15,7 +15,6 @@
 
         .day-block { background: #262626; border-radius: 8px; padding: 12px; margin-bottom: 12px; border-left: 4px solid #444; }
         .day-header { font-weight: bold; color: var(--green); margin-bottom: 10px; display: flex; justify-content: space-between; font-size: 0.9em; align-items: center; }
-        
         .unit-select { background: #000; border: 1px solid var(--green); color: var(--green); padding: 6px; border-radius: 4px; width: 90px; font-weight: bold; font-size: 0.9em; cursor: pointer; }
         
         .dt-highlight { border-left-color: var(--orange) !important; }
@@ -32,7 +31,8 @@
         .summary { background: #000; padding: 15px; border-radius: 10px; margin-top: 20px; border: 1px solid var(--green); }
         .line { display: flex; justify-content: space-between; margin: 6px 0; font-size: 0.85em; }
         .tax-line { color: #ff5252; }
-        .total-hours-line { color: var(--green); font-weight: bold; border-bottom: 1px solid #222; padding-bottom: 8px; margin-bottom: 8px; }
+        .hr-breakdown { color: #888; font-style: italic; border-bottom: 1px solid #222; padding-bottom: 8px; margin-bottom: 8px; }
+        .total-hours-line { color: var(--green); font-weight: bold; margin-bottom: 4px; }
         .net-total { font-size: 1.7em; color: var(--green); font-weight: 900; border-top: 1px solid #333; padding-top: 10px; margin-top: 10px; }
         
         .btn-email { background: #007bff; color: white; border: none; padding: 18px; width: 100%; border-radius: 8px; font-weight: bold; margin-top: 15px; font-size: 1em; cursor: pointer; }
@@ -53,7 +53,12 @@
     <div id="logContainer"></div>
 
     <div class="summary">
-        <div class="line total-hours-line"><span>Weekly Total:</span> <span id="outTotalHrs">0.0 hrs</span></div>
+        <div class="line total-hours-line"><span>Total Weekly Hours:</span> <span id="outTotalHrs">0.0 hrs</span></div>
+        <div class="line hr-breakdown">
+            <span>Reg: <b id="sumReg">0</b></span>
+            <span>1.5x: <b id="sumOt">0</b></span>
+            <span>2.0x: <b id="sumDt">0</b></span>
+        </div>
         <div class="line"><span>Gross Pay:</span> <span id="outGross">$0.00</span></div>
         <div class="line tax-line"><span>Income Tax (NL/Fed):</span> <span id="outTax">-$0.00</span></div>
         <div class="line tax-line"><span>CPP & EI (7.58%):</span> <span id="outCpp">-$0.00</span></div>
@@ -61,7 +66,7 @@
         <div class="line net-total"><span>Net Take Home:</span> <span id="outNet">$0.00</span></div>
     </div>
 
-    <button class="btn-email" onclick="sendReport()">📧 Email Professional Report</button>
+    <button class="btn-email" onclick="sendReport()">📧 Email Report</button>
     <button class="btn-clear" onclick="clearData()">Clear All Data</button>
 </div>
 
@@ -71,22 +76,14 @@ const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", 
 
 function init() {
     const container = document.getElementById('logContainer');
-    days.forEach((day, index) => {
+    days.forEach((day) => {
         const isDTDay = (day === "Friday" || day === "Saturday") ? "dt-highlight" : "";
-        
         let options = '<option value="N/A">Unit #</option>';
-        for(let i=1; i<=15; i++) {
-            options += `<option value="${i}">${i}</option>`;
-        }
+        for(let i=1; i<=15; i++) options += `<option value="${i}">${i}</option>`;
 
         container.innerHTML += `
             <div class="day-block ${isDTDay}">
-                <div class="day-header">
-                    <span>${day}</span>
-                    <select class="unit-select" onchange="calc()">
-                        ${options}
-                    </select>
-                </div>
+                <div class="day-header"><span>${day}</span><select class="unit-select" onchange="calc()">${options}</select></div>
                 <div class="input-grid">
                     <div class="input-group"><label>Reg</label><input type="number" class="val-reg" oninput="calc()"></div>
                     <div class="input-group"><label>1.5x</label><input type="number" class="val-ot" oninput="calc()"></div>
@@ -106,7 +103,7 @@ function init() {
 }
 
 function calc() {
-    let gross = 0, totalHrs = 0;
+    let gross = 0, totalHrs = 0, sReg = 0, sOt = 0, sDt = 0;
     const entries = [];
     document.querySelectorAll('.day-block').forEach(block => {
         const r = parseFloat(block.querySelector('.val-reg').value) || 0;
@@ -115,12 +112,13 @@ function calc() {
         const unit = block.querySelector('.unit-select').value;
         const note = block.querySelector('.notes-input').value;
         
+        sReg += r; sOt += o; sDt += d;
         totalHrs += (r + o + d);
         gross += (r * RATE) + (o * RATE * 1.5) + (d * RATE * 2);
         entries.push({r, o, d, unit, note});
     });
 
-    localStorage.setItem('truckerHoursFinal', JSON.stringify(entries));
+    localStorage.setItem('truckerHoursFinal_V3', JSON.stringify(entries));
 
     const taxable = Math.max(0, gross - 530); 
     const incomeTax = taxable * 0.227; 
@@ -129,6 +127,9 @@ function calc() {
     const net = gross - incomeTax - cppEi - unionRRSP;
 
     document.getElementById('outTotalHrs').innerText = totalHrs.toFixed(1) + " hrs";
+    document.getElementById('sumReg').innerText = sReg.toFixed(1);
+    document.getElementById('sumOt').innerText = sOt.toFixed(1);
+    document.getElementById('sumDt').innerText = sDt.toFixed(1);
     document.getElementById('outGross').innerText = "$" + gross.toFixed(2);
     document.getElementById('outTax').innerText = "-$" + incomeTax.toFixed(2);
     document.getElementById('outCpp').innerText = "-$" + cppEi.toFixed(2);
@@ -146,7 +147,7 @@ function loadData() {
     const savedDate = localStorage.getItem('weekEnding');
     if (savedDate) document.getElementById('weekEnding').value = savedDate;
     
-    const saved = localStorage.getItem('truckerHoursFinal');
+    const saved = localStorage.getItem('truckerHoursFinal_V3');
     if (saved) {
         const entries = JSON.parse(saved);
         const blocks = document.querySelectorAll('.day-block');
@@ -164,8 +165,8 @@ function loadData() {
 }
 
 function clearData() {
-    if(confirm("Wipe all hours, units, and notes?")) {
-        localStorage.removeItem('truckerHoursFinal');
+    if(confirm("Wipe all data?")) {
+        localStorage.removeItem('truckerHoursFinal_V3');
         location.reload();
     }
 }
@@ -176,7 +177,9 @@ function sendReport() {
     const totalHrs = document.getElementById('outTotalHrs').innerText;
     
     let body = `WEEKLY HOURS REPORT\n--------------------------\n`;
-    body += `Driver: ${driver}\nWeek Ending: ${date}\nTotal Hours: ${totalHrs}\n--------------------------\n\n`;
+    body += `Driver: ${driver}\nWeek Ending: ${date}\nTotal Hours: ${totalHrs}\n`;
+    body += `Breakdown: Reg: ${document.getElementById('sumReg').innerText}, OT: ${document.getElementById('sumOt').innerText}, DT: ${document.getElementById('sumDt').innerText}\n`;
+    body += `--------------------------\n\n`;
     
     document.querySelectorAll('.day-block').forEach(block => {
         const d = block.querySelector('.day-header span').innerText;
@@ -185,14 +188,13 @@ function sendReport() {
         const o = block.querySelector('.val-ot').value || 0;
         const dt = block.querySelector('.val-dt').value || 0;
         const note = block.querySelector('.notes-input').value;
-        
         if(r > 0 || o > 0 || dt > 0) {
             body += `${d} (Unit #${unit}): ${r} Reg, ${o} OT, ${dt} Double\n`;
             if(note) body += `   Note: ${note}\n`;
         }
     });
     
-    body += `\n--------------------------\nGross Total: ${document.getElementById('outGross').innerText}\nEst. Net Take Home: ${document.getElementById('outNet').innerText}`;
+    body += `\n--------------------------\nGross Total: ${document.getElementById('outGross').innerText}`;
     
     const subject = `Hours Report - ${driver} - W/E ${date}`;
     window.location.href = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
