@@ -2,217 +2,233 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Trucker Pro NL - 2026</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Trucker Pro NL - 2026 Persistent</title>
     <style>
-        :root { --green: #00ff41; --bg: #121212; --card: #1e1e1e; --border: #333; --orange: #ff9800; --blue: #007bff; }
-        body { font-family: -apple-system, sans-serif; background: var(--bg); color: #eee; padding: 0; margin: 0; padding-bottom: 120px; }
+        :root { --green: #00ff41; --bg: #121212; --card: #1e1e1e; --border: #333; --orange: #ff9800; --blue: #007bff; --red: #ff5252; }
+        body { font-family: -apple-system, sans-serif; background: var(--bg); color: #eee; padding: 0; margin: 0; padding-bottom: 180px; }
         
         .tabs { display: flex; background: #000; position: sticky; top: 0; z-index: 100; border-bottom: 1px solid var(--border); }
-        .tab { flex: 1; padding: 15px; text-align: center; color: #888; font-weight: bold; cursor: pointer; text-transform: uppercase; font-size: 0.8em; }
+        .tab { flex: 1; padding: 15px; text-align: center; color: #888; font-weight: bold; cursor: pointer; text-transform: uppercase; font-size: 0.7em; }
         .tab.active { color: var(--green); border-bottom: 3px solid var(--green); background: #1a1a1a; }
 
         .container { padding: 15px; max-width: 600px; margin: auto; }
         .page { display: none; }
         .page.active { display: block; }
 
-        .brand-header { text-align: center; padding: 20px 0; background: #1a1a1a; border-radius: 12px 12px 0 0; margin-bottom: 10px; border: 1px solid var(--border); }
-        .brand-logo { font-size: 1.2em; font-weight: 700; color: #fff; letter-spacing: 1px; }
-
         .card { background: var(--card); padding: 15px; border-radius: 12px; border: 1px solid var(--border); margin-bottom: 20px; }
-        input, select, textarea { background: #000; border: 1px solid var(--border); color: var(--green); padding: 12px; border-radius: 8px; font-weight: bold; width: 100%; box-sizing: border-box; font-size: 16px; }
-        .date-label { font-size: 0.7em; color: #888; text-transform: uppercase; margin-bottom: 4px; display: block; }
+        input, select, textarea { background: #000; border: 1px solid var(--border); color: var(--green); padding: 12px; border-radius: 8px; font-weight: bold; width: 100%; box-sizing: border-box; font-size: 16px; margin-bottom: 10px; }
+        label { font-size: 0.7em; color: #888; text-transform: uppercase; margin-bottom: 4px; display: block; margin-top: 5px; }
 
         .day-block { background: #262626; border-radius: 8px; padding: 12px; margin-bottom: 12px; border-left: 4px solid #444; }
-        .day-header { font-weight: bold; color: var(--green); margin-bottom: 10px; display: flex; justify-content: space-between; font-size: 0.9em; align-items: center; }
-        .unit-select { width: 90px; padding: 6px; }
-        
+        .day-header { font-weight: bold; color: var(--green); margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
         .dt-highlight { border-left-color: var(--orange) !important; }
-        .dt-highlight .day-header { color: var(--orange); }
-
+        
         .input-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
         .input-group { display: flex; flex-direction: column; text-align: center; }
-        .input-group label { font-size: 0.6em; color: #888; margin-bottom: 4px; }
+        .input-group label { font-size: 0.65em; color: #888; margin-bottom: 4px; text-transform: uppercase; margin-top: 0; }
         
-        .summary { background: #000; padding: 15px; border-radius: 10px; border: 1px solid var(--green); margin-top: 10px; }
-        .line { display: flex; justify-content: space-between; margin: 6px 0; font-size: 0.85em; }
-        .tax-line { color: #ff5252; }
-        .total-hours-line { color: var(--green); font-weight: bold; border-bottom: 1px solid #222; padding-bottom: 8px; margin-bottom: 8px; }
-        .net-total { font-size: 1.7em; color: var(--green); font-weight: 900; border-top: 1px solid #333; padding-top: 10px; margin-top: 10px; }
-
-        .action-bar { position: fixed; bottom: 0; left: 0; right: 0; background: #000; padding: 10px 15px; border-top: 1px solid var(--border); display: flex; flex-direction: column; gap: 5px; z-index: 200; }
-        .btn-email { background: var(--blue); color: white; border: none; padding: 15px; border-radius: 8px; font-weight: bold; font-size: 1em; cursor: pointer; }
-        .btn-clear { background: transparent; color: #555; border: none; font-size: 0.7em; text-decoration: underline; padding: 5px; }
+        .summary { background: #000; padding: 15px; border-radius: 10px; border: 1px solid var(--green); }
+        .line { display: flex; justify-content: space-between; margin: 6px 0; font-size: 0.9em; }
+        .net-total { font-size: 1.8em; color: var(--green); font-weight: 900; border-top: 1px solid #333; padding-top: 10px; margin-top: 10px; }
+        .projection-box { margin-top: 10px; padding-top: 10px; border-top: 1px dashed #444; color: var(--orange); font-size: 0.75em; text-align: center; }
 
         .date-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .history-item { display: flex; justify-content: space-between; padding: 10px; border-bottom: 1px solid #333; font-size: 0.9em; }
+
+        .action-bar { position: fixed; bottom: 0; left: 0; right: 0; background: #000; padding: 15px; border-top: 1px solid var(--border); display: flex; flex-direction: column; gap: 10px; z-index: 200; }
+        .btn { padding: 15px; border-radius: 8px; font-weight: bold; border: none; cursor: pointer; text-transform: uppercase; }
+        .btn-main { background: var(--blue); color: white; }
+        .btn-request { background: #6a1b9a; color: white; margin-top: 10px; } /* Purple for differentiation */
+        .btn-sub { background: #333; color: white; flex: 1; font-size: 0.8em; }
+        .btn-danger { background: transparent; color: #555; text-decoration: underline; font-size: 0.7em; margin-top: 5px;}
     </style>
 </head>
 <body>
 
 <div class="tabs">
-    <div class="tab active" onclick="showPage('logPage', this)">Weekly Log</div>
-    <div class="tab" onclick="showPage('payrollPage', this)">Payroll Form</div>
+    <div class="tab active" onclick="showPage('logPage', this)">Hours</div>
+    <div class="tab" onclick="showPage('payrollPage', this)">Requests</div>
+    <div class="tab" onclick="showPage('historyPage', this)">History</div>
 </div>
 
 <div class="container">
     <div id="logPage" class="page active">
         <div class="card">
             <input type="text" id="driverName" placeholder="DRIVER NAME" oninput="saveAndCalc()">
-            <div style="margin-top:10px;">
-                <label class="date-label">Week Ending (Saturday):</label>
-                <input type="date" id="weekEnding" oninput="saveAndCalc()">
-            </div>
-            <div id="logContainer" style="margin-top:15px;"></div>
-            
-            <div class="summary">
-                <div class="line total-hours-line"><span>Total Weekly Hours:</span> <span id="outTotalHrs">0.0 hrs</span></div>
-                <div class="line" style="color:#888; font-style:italic;">
-                    <span>Reg: <b id="sumReg">0</b></span>
-                    <span>1.5x: <b id="sumOt">0</b></span>
-                    <span>2.0x: <b id="sumDt">0</b></span>
-                </div>
-                <div class="line"><span>Gross Pay:</span> <span id="outGross">$0.00</span></div>
-                <div class="line tax-line"><span>Income Tax (NL/Fed):</span> <span id="outTax">-$0.00</span></div>
-                <div class="line tax-line"><span>CPP & EI (7.58%):</span> <span id="outCpp">-$0.00</span></div>
-                <div class="line tax-line"><span>Union & RRSP (7.5%):</span> <span id="outUnion">-$0.00</span></div>
-                <div class="line net-total"><span>Net Take Home:</span> <span id="outNet">$0.00</span></div>
-            </div>
+            <label>WEEK ENDING (SATURDAY)</label>
+            <input type="date" id="weekEnding" oninput="saveAndCalc()">
+        </div>
+
+        <div id="logContainer"></div>
+        
+        <div class="summary">
+            <div class="line"><span>Gross Pay:</span> <span id="outGross">$0.00</span></div>
+            <div class="line" style="color:var(--red)"><span>Income Tax (Fed/NL):</span> <span id="outTax">-$0.00</span></div>
+            <div class="line" style="color:var(--red)"><span>CPP & EI (2026):</span> <span id="outCpp">-$0.00</span></div>
+            <div class="line" style="color:var(--red)"><span>Union & RRSP (7.5%):</span> <span id="outUnion">-$0.00</span></div>
+            <div class="line net-total"><span>Net Pay:</span> <span id="outNet">$0.00</span></div>
+            <div id="projection" class="projection-box">Projected Annual Net: $0.00</div>
+            <div style="text-align:right; font-size:0.6em; color:#555; margin-top:5px;" id="taxPct">Est. Effective Rate: 0%</div>
         </div>
     </div>
 
     <div id="payrollPage" class="page">
-        <div class="brand-header"><div class="brand-logo">PAYROLL REQUEST FORM</div></div>
         <div class="card">
-            <label class="date-label">Bank Payout (Hrs)</label>
+            <h3 style="color:var(--green); margin-top:0;">Payroll Requests</h3>
+            
+            <label>Bank Payout (Hrs)</label>
             <input type="number" id="payOut" placeholder="0.0" oninput="saveAndCalc()">
-            <br><br>
-            <label class="date-label">Add to Bank (Hrs)</label>
+            
+            <label>Add to Bank (Hrs)</label>
             <input type="number" id="bankIn" placeholder="0.0" oninput="saveAndCalc()">
-            <br><br>
-            <label class="date-label">Sick Day Date</label>
+
+            <label>Sick Day Date</label>
             <input type="date" id="sickDate" oninput="saveAndCalc()">
-            <br><br>
-            <label class="date-label">Vacation Payout ($ Amount)</label>
+
+            <label>Vacation Payout ($ Amount)</label>
             <input type="number" id="vacPayout" placeholder="0.00" oninput="saveAndCalc()">
-            <br><br>
-            <label class="date-label">Vacation Time Off (Calendar)</label>
+
+            <label>Vacation Time Off</label>
             <div class="date-row">
                 <div>
-                    <label class="date-label" style="color:var(--blue)">Start</label>
+                    <span style="font-size:0.6em; color:var(--blue)">START</span>
                     <input type="date" id="vacStart" oninput="saveAndCalc()">
                 </div>
                 <div>
-                    <label class="date-label" style="color:var(--blue)">End</label>
+                    <span style="font-size:0.6em; color:var(--blue)">END</span>
                     <input type="date" id="vacEnd" oninput="saveAndCalc()">
                 </div>
             </div>
-            <br>
-            <label class="date-label">Additional Instructions</label>
+
+            <label>Additional Notes</label>
             <textarea id="payrollNotes" rows="3" placeholder="Notes for payroll office..." oninput="saveAndCalc()"></textarea>
+
+            <button class="btn btn-request" onclick="sendReport(true)">📧 Email ONLY Requests</button>
+            <p style="font-size: 0.6em; color: #666; text-align: center; margin-top: 5px;">Use this to send Bank/Sick/Vac info without daily hours.</p>
+        </div>
+    </div>
+
+    <div id="historyPage" class="page">
+        <div class="card">
+            <h3 style="color:var(--green); margin-top:0;">Past Weeks</h3>
+            <div id="historyList"></div>
+            <button class="btn-danger" style="margin-top:20px;" onclick="clearHistory()">Clear History</button>
         </div>
     </div>
 </div>
 
 <div class="action-bar">
-    <button class="btn-email" onclick="sendReport()">📧 Send Combined Report</button>
-    <button class="btn-clear" onclick="clearAll()">Reset All Data</button>
+    <button class="btn btn-main" onclick="sendReport(false)">📧 Email Full Report</button>
+    <div style="display:flex; gap:10px;">
+        <button class="btn btn-sub" onclick="exportToCSV()">💾 Save CSV</button>
+        <button class="btn btn-sub" onclick="document.getElementById('csvPicker').click()">📂 Load CSV</button>
+    </div>
+    <input type="file" id="csvPicker" accept=".csv" style="display:none" onchange="importFromCSV(this)">
+    <button class="btn-danger" onclick="clearAll()">Reset This Week</button>
 </div>
 
 <script>
 const RATE = 25.75;
 const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 
+async function requestPersistence() {
+    if (navigator.storage && navigator.storage.persist) await navigator.storage.persist();
+}
+requestPersistence();
+
 function showPage(pageId, el) {
     document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
     document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
     document.getElementById(pageId).classList.add('active');
     el.classList.add('active');
-    window.scrollTo(0,0);
+    if(pageId === 'historyPage') renderHistory();
 }
 
 function init() {
     const container = document.getElementById('logContainer');
     days.forEach((day) => {
-        const isDTDay = (day === "Friday" || day === "Saturday") ? "dt-highlight" : "";
-        let options = '<option value="N/A">Unit #</option>';
-        for(let i=1; i<=15; i++) options += `<option value="${i}">${i}</option>`;
+        const highlight = (day === "Friday" || day === "Saturday") ? "dt-highlight" : "";
         container.innerHTML += `
-            <div class="day-block ${isDTDay}">
-                <div class="day-header"><span>${day}</span><select class="unit-select" onchange="saveAndCalc()">${options}</select></div>
+            <div class="day-block ${highlight}">
+                <div class="day-header">
+                    <span>${day}</span>
+                    <select class="unit-select" style="width:80px; padding:4px;" onchange="saveAndCalc()">
+                        <option value="N/A">Unit</option>${Array.from({length:15},(_,i)=>`<option value="${i+1}">${i+1}</option>`).join('')}
+                    </select>
+                </div>
                 <div class="input-grid">
-                    <div class="input-group"><label>Reg</label><input type="number" class="val-reg" oninput="saveAndCalc()"></div>
-                    <div class="input-group"><label>1.5x</label><input type="number" class="val-ot" oninput="saveAndCalc()"></div>
-                    <div class="input-group"><label>2.0x</label><input type="number" class="val-dt" oninput="saveAndCalc()"></div>
+                    <div class="input-group"><label>Reg</label><input type="number" class="val-reg" inputmode="decimal" oninput="saveAndCalc()"></div>
+                    <div class="input-group"><label>1.5x</label><input type="number" class="val-ot" inputmode="decimal" oninput="saveAndCalc()"></div>
+                    <div class="input-group"><label>2.0x</label><input type="number" class="val-dt" inputmode="decimal" oninput="saveAndCalc()"></div>
                 </div>
             </div>`;
     });
-    
-    const today = new Date();
-    const sat = new Date(today.setDate(today.getDate() + (6 - today.getDay())));
-    document.getElementById('weekEnding').value = sat.toISOString().split('T')[0];
-    
     loadData();
 }
 
 function saveAndCalc() {
-    let gross = 0, totalHrs = 0, sReg = 0, sOt = 0, sDt = 0;
+    let gross = 0;
     const hoursData = [];
     document.querySelectorAll('.day-block').forEach(block => {
         const r = parseFloat(block.querySelector('.val-reg').value) || 0;
         const o = parseFloat(block.querySelector('.val-ot').value) || 0;
         const d = parseFloat(block.querySelector('.val-dt').value) || 0;
-        const u = block.querySelector('.unit-select').value;
-        sReg += r; sOt += o; sDt += d;
-        totalHrs += (r + o + d);
         gross += (r * RATE) + (o * RATE * 1.5) + (d * RATE * 2);
-        hoursData.push({r, o, d, u});
+        hoursData.push({r, o, d, u: block.querySelector('.unit-select').value});
     });
 
-    const taxable = Math.max(0, gross - 530); 
-    const incomeTax = taxable * 0.227; 
-    const cppEi = gross * 0.0758;
-    const unionRRSP = gross * 0.075;
-    const net = gross - incomeTax - cppEi - unionRRSP;
+    const annualGross = gross * 52;
+    const fedBPA = 16452;
+    const nlBPA = 11188;
 
-    document.getElementById('outTotalHrs').innerText = totalHrs.toFixed(1) + " hrs";
-    document.getElementById('sumReg').innerText = sReg.toFixed(1);
-    document.getElementById('sumOt').innerText = sOt.toFixed(1);
-    document.getElementById('sumDt').innerText = sDt.toFixed(1);
+    let fedTax = (annualGross <= 58523) ? Math.max(0, annualGross - fedBPA) * 0.14 : (58523 - fedBPA) * 0.14 + (annualGross - 58523) * 0.205;
+    let provTax = (annualGross <= 44678) ? Math.max(0, annualGross - nlBPA) * 0.087 : (44678 - nlBPA) * 0.087 + (annualGross - 44678) * 0.145;
+
+    const weeklyTax = Math.max(0, (fedTax + provTax) / 52);
+    const cpp = Math.min(4646.45/52, Math.max(0, (annualGross - 3500) * 0.0595) / 52);
+    const ei = Math.min(1123.07/52, (annualGross * 0.0163) / 52);
+    const union = gross * 0.075;
+    const net = gross - weeklyTax - cpp - ei - union;
+
+    const finalNet = Math.max(0, net);
     document.getElementById('outGross').innerText = "$" + gross.toFixed(2);
-    document.getElementById('outTax').innerText = "-$" + incomeTax.toFixed(2);
-    document.getElementById('outCpp').innerText = "-$" + cppEi.toFixed(2);
-    document.getElementById('outUnion').innerText = "-$" + unionRRSP.toFixed(2);
-    document.getElementById('outNet').innerText = "$" + net.toFixed(2);
+    document.getElementById('outTax').innerText = "-$" + weeklyTax.toFixed(2);
+    document.getElementById('outCpp').innerText = "-$" + (cpp + ei).toFixed(2);
+    document.getElementById('outUnion').innerText = "-$" + union.toFixed(2);
+    document.getElementById('outNet').innerText = "$" + finalNet.toFixed(2);
+    document.getElementById('projection').innerText = `Projected Annual Net: $${(finalNet * 52).toLocaleString()}`;
+    document.getElementById('taxPct').innerText = `Est. Effective Rate: ${gross > 0 ? ((weeklyTax / gross) * 100).toFixed(1) : 0}%`;
 
-    const meta = {
+    localStorage.setItem('tp_meta', JSON.stringify({
         name: document.getElementById('driverName').value,
         week: document.getElementById('weekEnding').value,
         payOut: document.getElementById('payOut').value,
         bankIn: document.getElementById('bankIn').value,
-        sick: document.getElementById('sickDate').value,
-        vac: document.getElementById('vacPayout').value,
+        sickDate: document.getElementById('sickDate').value,
+        vacPayout: document.getElementById('vacPayout').value,
         vacStart: document.getElementById('vacStart').value,
         vacEnd: document.getElementById('vacEnd').value,
-        notes: document.getElementById('payrollNotes').value
-    };
-    localStorage.setItem('trucker_final_v2_meta', JSON.stringify(meta));
-    localStorage.setItem('trucker_final_v2_hours', JSON.stringify(hoursData));
+        notes: document.getElementById('payrollNotes').value,
+        lastNet: finalNet.toFixed(2)
+    }));
+    localStorage.setItem('tp_hours', JSON.stringify(hoursData));
 }
 
 function loadData() {
-    const meta = JSON.parse(localStorage.getItem('trucker_final_v2_meta'));
+    const meta = JSON.parse(localStorage.getItem('tp_meta'));
     if(meta) {
         document.getElementById('driverName').value = meta.name || "";
         document.getElementById('weekEnding').value = meta.week || "";
         document.getElementById('payOut').value = meta.payOut || "";
         document.getElementById('bankIn').value = meta.bankIn || "";
-        document.getElementById('sickDate').value = meta.sick || "";
-        document.getElementById('vacPayout').value = meta.vac || "";
+        document.getElementById('sickDate').value = meta.sickDate || "";
+        document.getElementById('vacPayout').value = meta.vacPayout || "";
         document.getElementById('vacStart').value = meta.vacStart || "";
         document.getElementById('vacEnd').value = meta.vacEnd || "";
         document.getElementById('payrollNotes').value = meta.notes || "";
     }
-    const hours = JSON.parse(localStorage.getItem('trucker_final_v2_hours'));
+    const hours = JSON.parse(localStorage.getItem('tp_hours'));
     if(hours) {
         document.querySelectorAll('.day-block').forEach((block, i) => {
             if(hours[i]) {
@@ -226,42 +242,88 @@ function loadData() {
     saveAndCalc();
 }
 
-function clearAll() { if(confirm("Wipe all data for a new week?")) { localStorage.clear(); location.reload(); } }
-
-function sendReport() {
-    const name = document.getElementById('driverName').value || "Driver";
-    const date = document.getElementById('weekEnding').value;
-    let body = `WEEKLY PAYROLL REPORT\nDriver: ${name}\nWeek Ending: ${date}\n\nHOURS:\n`;
-    document.querySelectorAll('.day-block').forEach(block => {
-        const d = block.querySelector('.day-header span').innerText;
-        const u = block.querySelector('.unit-select').value;
-        const r = block.querySelector('.val-reg').value || 0;
-        const o = block.querySelector('.val-ot').value || 0;
-        const dt = block.querySelector('.val-dt').value || 0;
-        if(r>0||o>0||dt>0) body += `${d} (Unit #${u}): ${r}RT, ${o}OT, ${dt}DT\n`;
-    });
-    body += `\nTOTALS:\nRT: ${document.getElementById('sumReg').innerText} | OT: ${document.getElementById('sumOt').innerText} | DT: ${document.getElementById('sumDt').innerText}\nGross Total: ${document.getElementById('outGross').innerText}\n\nPAYROLL REQUESTS:\n`;
-    
-    const po=document.getElementById('payOut').value, 
-          bi=document.getElementById('bankIn').value, 
-          sd=document.getElementById('sickDate').value, 
-          vp=document.getElementById('vacPayout').value,
-          vs=document.getElementById('vacStart').value,
-          ve=document.getElementById('vacEnd').value,
-          nt=document.getElementById('payrollNotes').value;
-
-    if(po) body += `* Payout Banked Time: ${po} hrs\n`; 
-    if(bi) body += `* Bank Earned Time: ${bi} hrs\n`; 
-    if(sd) body += `* Sick Day requested: ${sd}\n`; 
-    if(vp) body += `* Vacation Payout request: $${vp}\n`; 
-    if(vs && ve) body += `* Vacation Dates: ${vs} to ${ve}\n`;
-    else if(vs) body += `* Vacation starting: ${vs}\n`;
-    
-    if(nt) body += `\nNotes: ${nt}`;
-    if(!po && !bi && !sd && !vp && !vs && !ve && !nt) body += `No specific requests.`;
-    
-    window.location.href = `mailto:?subject=Payroll Report - ${name} - ${date}&body=${encodeURIComponent(body)}`;
+function renderHistory() {
+    const history = JSON.parse(localStorage.getItem('tp_history')) || [];
+    const list = document.getElementById('historyList');
+    list.innerHTML = history.length ? history.map(item => `
+        <div class="history-item"><span>${item.date}</span><span style="color:var(--green); font-weight:bold;">$${item.net}</span></div>
+    `).reverse().join('') : "<p style='color:#666'>No history yet.</p>";
 }
+
+function sendReport(requestsOnly = false) {
+    saveAndCalc();
+    const meta = JSON.parse(localStorage.getItem('tp_meta'));
+    
+    // History is only recorded for Full Reports
+    if (!requestsOnly) {
+        const history = JSON.parse(localStorage.getItem('tp_history')) || [];
+        if (!history.find(h => h.date === meta.week)) {
+            history.push({ date: meta.week, net: meta.lastNet });
+            localStorage.setItem('tp_history', JSON.stringify(history));
+        }
+    }
+
+    let body = `PAYROLL ${requestsOnly ? 'REQUEST ONLY' : 'FULL REPORT'}: ${meta.name}\nWeek Ending: ${meta.week}\n\n`;
+    
+    if (!requestsOnly) {
+        body += `HOURS:\n`;
+        document.querySelectorAll('.day-block').forEach((block, i) => {
+            const r = block.querySelector('.val-reg').value || 0;
+            const o = block.querySelector('.val-ot').value || 0;
+            const d = block.querySelector('.val-dt').value || 0;
+            if(r>0||o>0||d>0) body += `${days[i]} (Unit ${block.querySelector('.unit-select').value}): ${r}RT, ${o}OT, ${d}DT\n`;
+        });
+        body += `\n`;
+    }
+    
+    body += `PAYROLL REQUESTS:\n`;
+    if(meta.payOut) body += `* Bank Payout: ${meta.payOut} hrs\n`;
+    if(meta.bankIn) body += `* Add to Bank: ${meta.bankIn} hrs\n`;
+    if(meta.sickDate) body += `* Sick Day Date: ${meta.sickDate}\n`;
+    if(meta.vacPayout) body += `* Vacation Payout: $${meta.vacPayout}\n`;
+    if(meta.vacStart) body += `* Vacation Off: ${meta.vacStart} to ${meta.vacEnd || 'Ongoing'}\n`;
+    if(meta.notes) body += `\nNOTES/COMMENTS:\n${meta.notes}`;
+
+    const subject = requestsOnly ? `Payroll Request - ${meta.name}` : `Payroll Report - ${meta.name} - ${meta.week}`;
+    window.location.href = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+}
+
+function exportToCSV() {
+    const meta = JSON.parse(localStorage.getItem('tp_meta'));
+    let csv = "Day,Unit,Reg,OT,DT\n";
+    document.querySelectorAll('.day-block').forEach((block, i) => {
+        csv += `${days[i]},${block.querySelector('.unit-select').value},${block.querySelector('.val-reg').value || 0},${block.querySelector('.val-ot').value || 0},${block.querySelector('.val-dt').value || 0}\n`;
+    });
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `Log_${meta.name}_${meta.week}.csv`;
+    a.click();
+}
+
+function importFromCSV(input) {
+    const reader = new FileReader();
+    reader.onload = function() {
+        const lines = reader.result.split('\n').slice(1);
+        lines.forEach((line, i) => {
+            const cols = line.split(',');
+            if (cols.length < 5) return;
+            const block = document.querySelectorAll('.day-block')[i];
+            if (block) {
+                block.querySelector('.unit-select').value = cols[1];
+                block.querySelector('.val-reg').value = cols[2] == '0' ? '' : cols[2];
+                block.querySelector('.val-ot').value = cols[3] == '0' ? '' : cols[3];
+                block.querySelector('.val-dt').value = cols[4] == '0' ? '' : cols[4];
+            }
+        });
+        saveAndCalc();
+    };
+    reader.readAsText(input.files[0]);
+}
+
+function clearAll() { if(confirm("Clear this week's hours?")) { localStorage.removeItem('tp_hours'); location.reload(); } }
+function clearHistory() { if(confirm("Delete all history?")) { localStorage.removeItem('tp_history'); renderHistory(); } }
+
 init();
 </script>
 </body>
