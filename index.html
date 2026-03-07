@@ -175,6 +175,7 @@ text-transform:uppercase;
 }
 
 .btn-main{background:var(--blue);color:white;}
+.btn-request{background:var(--purple);color:white;}
 .btn-install{background:var(--green);color:black;}
 </style>
 </head>
@@ -189,6 +190,7 @@ text-transform:uppercase;
 
 <div class="container">
 
+<!-- Hours Page -->
 <div id="logPage" class="page active">
 
 <div class="small-hours" id="totalHours">Total Hours: 0</div>
@@ -220,27 +222,54 @@ Projected Annual Net: $0
 Est. Effective Rate: 0% | Top Bracket: 36.3%
 </div>
 
-</div>
+<button class="btn btn-main" onclick="resetHours()">Reset Hours</button>
+
 </div>
 
+<!-- Payroll Requests Page -->
 <div id="payrollPage" class="page">
 <div class="card">
-<h3 style="color:var(--green)">Payroll Requests</h3>
 
-<label>Vacation Request Date</label>
-<input type="date" id="vacationDate">
+<h3 style="color:var(--green); margin:0 0 10px 0;">Payouts & Requests</h3>
+
+<div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+<div>
+<label>Current Bank Hours</label>
+<input type="number" id="curBank" value="0" oninput="saveAndCalc()">
+</div>
+
+<div>
+<label>Sick Days Remaining</label>
+<input type="number" id="curSick" value="10" oninput="saveAndCalc()">
+</div>
+</div>
+
+<label>Add To Bank (Hours)</label>
+<input type="number" id="bankIn" placeholder="0.0" oninput="saveAndCalc()">
+
+<label>Bank Payout (Hours)</label>
+<input type="number" id="payOut" placeholder="0.0" oninput="saveAndCalc()">
 
 <label>Vacation Pay Request ($)</label>
-<input type="number" id="vacPayout">
+<input type="number" id="vacPayout" placeholder="0.00" oninput="saveAndCalc()">
 
-<label>Notes</label>
-<textarea id="payrollNotes"></textarea>
+<label>Vacation Request Date</label>
+<input type="date" id="vacDate" oninput="saveAndCalc()">
 
-<button class="btn btn-main" onclick="sendReport(true)">Email Request Only</button>
+<label>Sick Day Request Date</label>
+<input type="date" id="sickDate" oninput="saveAndCalc()">
+
+<label>Notes / Dispatch Info</label>
+<textarea id="payrollNotes" rows="2" placeholder="Unit numbers, delays, etc." oninput="saveAndCalc()"></textarea>
+
+<button class="btn btn-request" onclick="sendReport(true)">
+📧 Email Requests Only
+</button>
 
 </div>
 </div>
 
+<!-- History Page -->
 <div id="historyPage" class="page">
 <div class="card">
 
@@ -258,6 +287,7 @@ Total YTD: $0
 
 </div>
 
+<!-- Action Bar -->
 <div class="action-bar">
 
 <button class="btn btn-install" id="installBtn" style="display:none">
@@ -265,7 +295,7 @@ Install App
 </button>
 
 <button class="btn btn-main" onclick="sendReport(false)">
-Email Full Report
+📧 Email Full Report
 </button>
 
 </div>
@@ -274,154 +304,130 @@ Email Full Report
 
 const RATE=25.75;
 const FIXED_DED=184.01;
-
 let deferredPrompt;
 
+// PWA install prompt
 window.addEventListener('beforeinstallprompt',(e)=>{
-e.preventDefault();
-deferredPrompt=e;
-document.getElementById('installBtn').style.display='block';
+    e.preventDefault();
+    deferredPrompt=e;
+    document.getElementById('installBtn').style.display='block';
 });
 
-document.getElementById('installBtn').addEventListener('click',async()=>{
-
-if(!deferredPrompt) return;
-
-deferredPrompt.prompt();
-const choice=await deferredPrompt.userChoice;
-
-if(choice.outcome==='accepted'){
-document.getElementById('installBtn').style.display='none';
-}
-
-deferredPrompt=null;
-
+document.getElementById('installBtn').addEventListener('click', async()=>{
+    if(!deferredPrompt) return;
+    deferredPrompt.prompt();
+    const choice = await deferredPrompt.userChoice;
+    if(choice.outcome==='accepted'){
+        document.getElementById('installBtn').style.display='none';
+    }
+    deferredPrompt=null;
 });
 
 function showPage(pId,el){
-
-document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
-document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
-
-document.getElementById(pId).classList.add('active');
-el.classList.add('active');
-
+    document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+    document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+    document.getElementById(pId).classList.add('active');
+    el.classList.add('active');
 }
 
 function init(){
-
-const days=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
-const cont=document.getElementById('logContainer');
-
-days.forEach(day=>{
-
-cont.innerHTML+=`
-<div class="day-block">
-<div class="day-header">${day}</div>
-
-<div class="input-grid">
-
-<div class="input-group">
-<label>Reg</label>
-<input type="number" class="val-reg" oninput="saveAndCalc()">
-</div>
-
-<div class="input-group">
-<label>1.5x</label>
-<input type="number" class="val-ot" oninput="saveAndCalc()">
-</div>
-
-<div class="input-group">
-<label>2.0x</label>
-<input type="number" class="val-dt" oninput="saveAndCalc()">
-</div>
-
-</div>
-</div>
-`;
-
-});
-
+    const days=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+    const cont=document.getElementById('logContainer');
+    days.forEach(day=>{
+        cont.innerHTML+=`
+        <div class="day-block">
+            <div class="day-header">${day}</div>
+            <div class="input-grid">
+                <div class="input-group"><label>Reg</label><input type="number" class="val-reg" oninput="saveAndCalc()"></div>
+                <div class="input-group"><label>1.5x</label><input type="number" class="val-ot" oninput="saveAndCalc()"></div>
+                <div class="input-group"><label>2.0x</label><input type="number" class="val-dt" oninput="saveAndCalc()"></div>
+            </div>
+        </div>`;
+    });
 }
 
 function saveAndCalc(){
+    let r=0, ot=0, dt=0;
+    document.querySelectorAll('.day-block').forEach(b=>{
+        r+=parseFloat(b.querySelector('.val-reg').value)||0;
+        ot+=parseFloat(b.querySelector('.val-ot').value)||0;
+        dt+=parseFloat(b.querySelector('.val-dt').value)||0;
+    });
 
-let r=0,ot=0,dt=0;
+    const bIn = parseFloat(document.getElementById('bankIn').value)||0;
+    const bOut = parseFloat(document.getElementById('payOut').value)||0;
+    const vPay = parseFloat(document.getElementById('vacPayout').value)||0;
+    const gross = (r+bOut-bIn)*RATE + ot*RATE*1.5 + dt*RATE*2 + vPay;
+    const ann = gross*52;
 
-document.querySelectorAll('.day-block').forEach(b=>{
+    const tax = ann*0.25/52;
+    const cpp = gross*0.05;
+    const net = gross - tax - cpp - FIXED_DED;
 
-r+=parseFloat(b.querySelector('.val-reg').value)||0;
-ot+=parseFloat(b.querySelector('.val-ot').value)||0;
-dt+=parseFloat(b.querySelector('.val-dt').value)||0;
+    document.getElementById('outGross').innerText="$"+gross.toFixed(2);
+    document.getElementById('outTax').innerText="-$"+tax.toFixed(2);
+    document.getElementById('outCpp').innerText="-$"+cpp.toFixed(2);
+    document.getElementById('outNet').innerText="$"+net.toFixed(2);
 
-});
+    document.getElementById('totalHours').innerText="Total Hours: "+(r+ot+dt).toFixed(2);
 
-const gross=(r*RATE)+(ot*RATE*1.5)+(dt*RATE*2);
-
-const ann=gross*52;
-
-const tax=ann*0.25/52;
-
-const cpp=gross*0.05;
-
-const net=gross-tax-cpp-FIXED_DED;
-
-document.getElementById('outGross').innerText="$"+gross.toFixed(2);
-document.getElementById('outTax').innerText="-$"+tax.toFixed(2);
-document.getElementById('outCpp').innerText="-$"+cpp.toFixed(2);
-document.getElementById('outNet').innerText="$"+net.toFixed(2);
-
-document.getElementById('totalHours').innerText="Total Hours: "+(r+ot+dt).toFixed(2);
-
-document.getElementById('totalHours').title=`Reg: ${r} hrs
-OT: ${ot} hrs
-DT: ${dt} hrs`;
-
-document.getElementById('projection').innerText="Projected Annual Net: $"+(net*52).toFixed(0);
-
-}
-
-function resetHistory(){
-
-if(confirm("Reset YTD History?")){
-document.getElementById('ytdBase').value=0;
-document.getElementById('ytdTotal').innerText="Total YTD: $0";
-}
-
+    const ytd = parseFloat(document.getElementById('ytdBase').value)||0;
+    document.getElementById('ytdTotal').innerText=`Total YTD: $${(ytd+gross).toFixed(2)}`;
 }
 
 function sendReport(reqOnly){
+    const name = document.getElementById('driverName').value;
+    const week = document.getElementById('weekEnding').value;
+    const bIn = document.getElementById('bankIn').value;
+    const bOut = document.getElementById('payOut').value;
+    const vPay = document.getElementById('vacPayout').value;
+    const vacDate = document.getElementById('vacDate').value;
+    const sickDate = document.getElementById('sickDate').value;
+    const notes = document.getElementById('payrollNotes').value;
 
-const name=document.getElementById('driverName').value;
-const week=document.getElementById('weekEnding').value;
-const notes=document.getElementById('payrollNotes').value;
+    let subject = reqOnly ? `Payroll Request - ${name}` : `Log - ${name} - ${week}`;
 
-let subject=reqOnly?`Payroll Request - ${name}`:`Log - ${name} - ${week}`;
+    let body = `NAME: ${name}\nWEEK: ${week}\n\n`;
 
-let body=`NAME: ${name}
-WEEK: ${week}
+    if(bIn) body += `BANKING IN: ${bIn} hours\n`;
+    if(bOut) body += `BANK PAYOUT: ${bOut} hours\n`;
+    if(vPay) body += `VACATION PAYOUT: $${vPay}\n`;
+    if(vacDate) body += `VACATION DATE: ${vacDate}\n`;
+    if(sickDate) body += `SICK DAY: ${sickDate}\n`;
+    if(notes) body += `NOTES: ${notes}\n`;
 
-`;
+    if(!reqOnly){
+        body += `EST. GROSS: ${document.getElementById('outGross').innerText}\n`;
+        body += `EST. NET: ${document.getElementById('outNet').innerText}\n`;
+    }
 
-if(notes) body+=`Notes: ${notes}
-
-`;
-
-if(!reqOnly){
-
-body+=`Gross: ${document.getElementById('outGross').innerText}
-Net: ${document.getElementById('outNet').innerText}`;
-
+    window.location.href = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
 }
 
-window.location.href=`mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+function resetHours(){
+    if(confirm("Reset all hours for this week?")){
+        document.querySelectorAll('.val-reg, .val-ot, .val-dt').forEach(i=>i.value="");
+        document.getElementById('bankIn').value="";
+        document.getElementById('payOut').value="";
+        document.getElementById('vacPayout').value="";
+        document.getElementById('vacDate').value="";
+        document.getElementById('sickDate').value="";
+        document.getElementById('payrollNotes').value="";
+        saveAndCalc();
+    }
+}
 
+function resetHistory(){
+    if(confirm("Reset YTD History?")){
+        document.getElementById('ytdBase').value=0;
+        document.getElementById('ytdTotal').innerText="Total YTD: $0";
+    }
 }
 
 init();
 
 if('serviceWorker' in navigator){
-navigator.serviceWorker.register('service-worker.js');
+    navigator.serviceWorker.register('service-worker.js');
 }
 
 </script>
