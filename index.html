@@ -4,323 +4,133 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Trucker Pro NL</title>
-
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#27ae60">
 
 <style>
 :root{
---green:#00ff41;
---bg:#121212;
---card:#1e1e1e;
---border:#333;
---orange:#ff9800;
---blue:#007bff;
---red:#ff5252;
---purple:#6a1b9a;
+--green:#00ff41; --bg:#121212; --card:#1e1e1e; --border:#333;
+--orange:#ff9800; --blue:#007bff; --red:#ff5252; --purple:#6a1b9a;
 }
-
-body{
-font-family:-apple-system, sans-serif;
-background:var(--bg);
-color:#eee;
-margin:0;
-padding-bottom:180px;
-}
-
-.tabs{
-display:flex;
-background:#000;
-position:sticky;
-top:0;
-z-index:100;
-border-bottom:1px solid var(--border);
-}
-
-.tab{
-flex:1;
-padding:15px;
-text-align:center;
-color:#888;
-font-weight:bold;
-cursor:pointer;
-text-transform:uppercase;
-font-size:.7em;
-}
-
-.tab.active{
-color:var(--green);
-border-bottom:3px solid var(--green);
-background:#1a1a1a;
-}
-
-.container{
-padding:15px;
-max-width:600px;
-margin:auto;
-}
-
-.page{display:none;}
-.page.active{display:block;}
-
-.card{
-background:var(--card);
-padding:15px;
-border-radius:12px;
-border:1px solid var(--border);
-margin-bottom:20px;
-}
-
-input,select,textarea{
-background:#000;
-border:1px solid var(--border);
-color:var(--green);
-padding:12px;
-border-radius:8px;
-font-weight:bold;
-width:100%;
-box-sizing:border-box;
-font-size:16px;
-margin-bottom:10px;
-}
-
-label{
-font-size:.7em;
-color:#888;
-text-transform:uppercase;
-margin-bottom:4px;
-display:block;
-margin-top:5px;
-}
-
-.day-block{
-background:#262626;
-border-radius:8px;
-padding:12px;
-margin-bottom:12px;
-border-left:4px solid #444;
-}
-
-.day-header{
-font-weight:bold;
-color:var(--green);
-margin-bottom:10px;
-display:flex;
-justify-content:space-between;
-}
-
-.input-grid{
-display:grid;
-grid-template-columns:1fr 1fr 1fr;
-gap:8px;
-}
-
-.input-group{
-display:flex;
-flex-direction:column;
-text-align:center;
-}
-
-.summary{
-background:#000;
-padding:15px;
-border-radius:10px;
-border:1px solid var(--green);
-}
-
-.line{
-display:flex;
-justify-content:space-between;
-margin:6px 0;
-font-size:.9em;
-}
-
-.net-total{
-font-size:1.8em;
-color:var(--green);
-font-weight:900;
-border-top:1px solid #333;
-padding-top:10px;
-margin-top:10px;
-}
-
-.small-hours{
-font-size:.7em;
-color:#888;
-text-align:center;
-margin-bottom:10px;
-}
-
-.action-bar{
-position:fixed;
-bottom:0;
-left:0;
-right:0;
-background:#000;
-padding:15px;
-border-top:1px solid var(--border);
-display:flex;
-flex-direction:column;
-gap:10px;
-z-index:200;
-}
-
-.btn{
-padding:15px;
-border-radius:8px;
-font-weight:bold;
-border:none;
-cursor:pointer;
-text-transform:uppercase;
-}
-
-.btn-main{background:var(--blue);color:white;}
-.btn-request{background:var(--purple);color:white;}
-.btn-install{background:var(--green);color:black;}
+body{ font-family:-apple-system, sans-serif; background:var(--bg); color:#eee; margin:0; padding-bottom:220px; }
+.tabs{ display:flex; background:#000; position:sticky; top:0; z-index:100; border-bottom:1px solid var(--border); }
+.tab{ flex:1; padding:15px; text-align:center; color:#888; font-weight:bold; cursor:pointer; text-transform:uppercase; font-size:.7em; }
+.tab.active{ color:var(--green); border-bottom:3px solid var(--green); background:#1a1a1a; }
+.container{ padding:15px; max-width:600px; margin:auto; }
+.page{ display:none; }
+.page.active{ display:block; }
+.card{ background:var(--card); padding:15px; border-radius:12px; border:1px solid var(--border); margin-bottom:20px; }
+input,textarea{ background:#000; border:1px solid var(--border); color:var(--green); padding:12px; border-radius:8px; font-weight:bold; width:100%; box-sizing:border-box; font-size:16px; margin-bottom:10px; }
+label{ font-size:.7em; color:#888; text-transform:uppercase; margin-bottom:4px; display:block; margin-top:5px; }
+.day-block{ background:#262626; border-radius:8px; padding:12px; margin-bottom:12px; border-left:4px solid #444; }
+.day-header{ font-weight:bold; color:var(--green); margin-bottom:10px; }
+.input-grid{ display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; }
+.input-group{ display:flex; flex-direction:column; text-align:center; }
+.summary{ background:#000; padding:15px; border-radius:10px; border:1px solid var(--green); }
+.line{ display:flex; justify-content:space-between; margin:6px 0; font-size:.9em; }
+.net-total{ font-size:1.8em; color:var(--green); font-weight:900; border-top:1px solid #333; padding-top:10px; margin-top:10px; }
+.action-bar{ position:fixed; bottom:0; left:0; right:0; background:#000; padding:15px; border-top:1px solid var(--border); display:flex; flex-direction:column; gap:8px; z-index:200; }
+.btn{ padding:14px; border-radius:8px; font-weight:bold; border:none; cursor:pointer; text-transform:uppercase; font-size: 0.8em; }
+.btn-main{ background:var(--blue); color:white; }
+.btn-request{ background:var(--purple); color:white; }
+.btn-install{ background:var(--green); color:black; display: block !important; }
+.btn-reset{ background:#333; color:#888; margin-top:10px; width:100%; }
 </style>
 </head>
-
 <body>
 
 <div class="tabs">
-<div class="tab active" onclick="showPage('logPage',this)">Hours</div>
-<div class="tab" onclick="showPage('payrollPage',this)">Requests</div>
-<div class="tab" onclick="showPage('historyPage',this)">History</div>
+    <div class="tab active" onclick="showPage('logPage',this)">Hours</div>
+    <div class="tab" onclick="showPage('payrollPage',this)">Requests</div>
+    <div class="tab" onclick="showPage('historyPage',this)">History</div>
 </div>
 
 <div class="container">
 
-<!-- Hours Page -->
-<div id="logPage" class="page active">
+    <div id="logPage" class="page active">
+        <div style="display:flex; justify-content:space-between; margin-bottom:10px; align-items: center;">
+            <span style="font-size:0.8em; color:var(--orange); font-weight:bold;" id="totalHours">Total: 0.00h</span>
+            <button class="btn" style="padding:5px 10px; font-size:0.6em; background:#444;" onclick="resetHours()">Reset Week</button>
+        </div>
 
-<div class="small-hours" id="totalHours">Total Hours: 0</div>
+        <div class="card">
+            <input type="text" id="driverName" placeholder="DRIVER NAME" oninput="saveAndCalc()">
+            <label>WEEK ENDING</label>
+            <input type="date" id="weekEnding" oninput="saveAndCalc()">
+        </div>
 
-<div class="card">
-<input type="text" id="driverName" placeholder="DRIVER NAME" oninput="saveAndCalc()">
-<label>WEEK ENDING</label>
-<input type="date" id="weekEnding" oninput="saveAndCalc()">
-</div>
+        <div id="logContainer"></div>
 
-<div id="logContainer"></div>
+        <div class="summary">
+            <div class="line"><span>Weekly Gross:</span><span id="outGross">$0.00</span></div>
+            <div class="line" style="color:var(--red)"><span>Tax (Fed/Prov):</span><span id="outTax">-$0.00</span></div>
+            <div class="line" style="color:var(--red)"><span>CPP/EI:</span><span id="outCpp">-$0.00</span></div>
+            <div class="line" style="color:var(--red)"><span>Fixed Deductions:</span><span id="outFixed">-$184.01</span></div>
+            <div class="line net-total"><span>Net Pay:</span><span id="outNet">$0.00</span></div>
+            
+            <div style="border-top: 1px dashed #333; margin-top:10px; padding-top:10px;">
+                <div class="line" style="font-size:0.75em; color:#777;"><span>Est. Effective Tax Rate:</span><span id="effRate">0%</span></div>
+                <div class="line" style="font-size:0.75em; color:#777;"><span>Projected Annual Net:</span><span id="annNet">$0.00</span></div>
+            </div>
+        </div>
+    </div>
 
-<div class="summary">
-<div class="line"><span>Weekly Gross:</span><span id="outGross">$0.00</span></div>
-<div class="line"><span>Tax:</span><span id="outTax">$0.00</span></div>
-<div class="line"><span>CPP/EI:</span><span id="outCpp">$0.00</span></div>
-<div class="line"><span>Fixed:</span><span id="outFixed">-$184.01</span></div>
+    <div id="payrollPage" class="page">
+        <div class="card">
+            <h3 style="color:var(--green); margin:0 0 10px 0;">Time Off & Payouts</h3>
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+                <div><label>Vacation Start</label><input type="date" id="vacStart"></div>
+                <div><label>Vacation End</label><input type="date" id="vacEnd"></div>
+            </div>
+            <label>Vacation Payout ($)</label><input type="number" id="vacPayout" placeholder="0.00" oninput="saveAndCalc()">
+            <label>Sick Day Date</label><input type="date" id="sickDate" oninput="saveAndCalc()">
+            <label>Notes / Start & End Times</label>
+            <textarea id="payrollNotes" rows="3" placeholder="Mon: 06:00 - 18:30..."></textarea>
+            <button class="btn btn-request" style="width:100%" onclick="sendReport(true)">📧 Email Requests Only</button>
+        </div>
+    </div>
 
-<div class="line net-total">
-<span>Net Pay:</span>
-<span id="outNet">$0.00</span>
-</div>
-
-<div id="projection" style="font-size:.8em;color:#888;text-align:center;margin-top:10px;">
-Projected Annual Net: $0
-</div>
-
-<div id="taxDetails" style="font-size:.65em;color:#777;text-align:center;margin-top:5px;">
-Est. Effective Rate: 0% | Top Bracket: 36.3%
-</div>
-
-<button class="btn btn-main" onclick="resetHours()">Reset Hours</button>
-
-</div>
-
-<!-- Payroll Requests Page -->
-<div id="payrollPage" class="page">
-<div class="card">
-
-<h3 style="color:var(--green); margin:0 0 10px 0;">Payouts & Requests</h3>
-
-<div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
-<div>
-<label>Current Bank Hours</label>
-<input type="number" id="curBank" value="0" oninput="saveAndCalc()">
-</div>
-
-<div>
-<label>Sick Days Remaining</label>
-<input type="number" id="curSick" value="10" oninput="saveAndCalc()">
-</div>
-</div>
-
-<label>Add To Bank (Hours)</label>
-<input type="number" id="bankIn" placeholder="0.0" oninput="saveAndCalc()">
-
-<label>Bank Payout (Hours)</label>
-<input type="number" id="payOut" placeholder="0.0" oninput="saveAndCalc()">
-
-<label>Vacation Pay Request ($)</label>
-<input type="number" id="vacPayout" placeholder="0.00" oninput="saveAndCalc()">
-
-<label>Vacation Request Date</label>
-<input type="date" id="vacDate" oninput="saveAndCalc()">
-
-<label>Sick Day Request Date</label>
-<input type="date" id="sickDate" oninput="saveAndCalc()">
-
-<label>Notes / Dispatch Info</label>
-<textarea id="payrollNotes" rows="2" placeholder="Unit numbers, delays, etc." oninput="saveAndCalc()"></textarea>
-
-<button class="btn btn-request" onclick="sendReport(true)">
-📧 Email Requests Only
-</button>
-
-</div>
-</div>
-
-<!-- History Page -->
-<div id="historyPage" class="page">
-<div class="card">
-
-<label>YTD Base Gross</label>
-<input type="number" id="ytdBase" value="0" oninput="saveAndCalc()">
-
-<div id="ytdTotal" style="color:var(--green);font-weight:bold;">
-Total YTD: $0
-</div>
-
-<button class="btn btn-main" onclick="resetHistory()">Reset History</button>
-
-</div>
-</div>
+    <div id="historyPage" class="page">
+        <div class="card">
+            <label>YTD Base Gross</label>
+            <input type="number" id="ytdBase" value="0.00" oninput="saveAndCalc()">
+            <div id="ytdTotal" style="color:var(--green);font-weight:bold;font-size:1.4em;text-align:center;padding:15px; border:1px solid #333; border-radius:8px; margin-bottom:10px;">
+                Total YTD: $0.00
+            </div>
+            <button class="btn btn-main" style="background:var(--orange); width:100%;" onclick="rolloverWeek()">⏭️ Rollover to YTD</button>
+            <button class="btn btn-reset" onclick="resetHistory()">Reset All History</button>
+        </div>
+    </div>
 
 </div>
 
-<!-- Action Bar -->
 <div class="action-bar">
-
-<button class="btn btn-install" id="installBtn" style="display:none">
-Install App
-</button>
-
-<button class="btn btn-main" onclick="sendReport(false)">
-📧 Email Full Report
-</button>
-
+    <button class="btn btn-install" id="installBtn">Install Trucker Pro NL</button>
+    <button class="btn btn-main" onclick="sendReport(false)">📧 Email Full Report</button>
 </div>
 
 <script>
-
 const RATE=25.75;
 const FIXED_DED=184.01;
 let deferredPrompt;
 
-// PWA install prompt
 window.addEventListener('beforeinstallprompt',(e)=>{
-    e.preventDefault();
-    deferredPrompt=e;
-    document.getElementById('installBtn').style.display='block';
+    e.preventDefault(); deferredPrompt=e;
 });
 
-document.getElementById('installBtn').addEventListener('click', async()=>{
-    if(!deferredPrompt) return;
-    deferredPrompt.prompt();
-    const choice = await deferredPrompt.userChoice;
-    if(choice.outcome==='accepted'){
-        document.getElementById('installBtn').style.display='none';
+document.getElementById('installBtn').addEventListener('click', async () => {
+    if (/iPhone|iPad|iPod/i.test(navigator.userAgent)) {
+        alert("On iPhone: Tap the 'Share' icon (square with arrow) in Safari, then select 'Add to Home Screen'.");
+        return;
     }
-    deferredPrompt=null;
+    if (!deferredPrompt) {
+        alert("Tap the three dots in your browser menu and select 'Install' or 'Add to Home Screen'.");
+        return;
+    }
+    deferredPrompt.prompt();
+    const { outcome } = await deferredPrompt.userChoice;
+    if (outcome === 'accepted') document.getElementById('installBtn').style.display = 'none';
+    deferredPrompt = null;
 });
 
 function showPage(pId,el){
@@ -334,8 +144,10 @@ function init(){
     const days=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
     const cont=document.getElementById('logContainer');
     days.forEach(day=>{
+        // Apply orange highlight to Friday and Saturday only
+        const highlight = (day === "Fri" || day === "Sat") ? "border-left: 4px solid var(--orange)" : "";
         cont.innerHTML+=`
-        <div class="day-block">
+        <div class="day-block" style="${highlight}">
             <div class="day-header">${day}</div>
             <div class="input-grid">
                 <div class="input-group"><label>Reg</label><input type="number" class="val-reg" oninput="saveAndCalc()"></div>
@@ -354,83 +166,73 @@ function saveAndCalc(){
         dt+=parseFloat(b.querySelector('.val-dt').value)||0;
     });
 
-    const bIn = parseFloat(document.getElementById('bankIn').value)||0;
-    const bOut = parseFloat(document.getElementById('payOut').value)||0;
     const vPay = parseFloat(document.getElementById('vacPayout').value)||0;
-    const gross = (r+bOut-bIn)*RATE + ot*RATE*1.5 + dt*RATE*2 + vPay;
+    const sick = document.getElementById('sickDate').value;
+    if(sick) r += 9;
+
+    const gross = r*RATE + ot*RATE*1.5 + dt*RATE*2 + vPay;
     const ann = gross*52;
 
-    const tax = ann*0.25/52;
-    const cpp = gross*0.05;
-    const net = gross - tax - cpp - FIXED_DED;
+    const fedT = (ann <= 58523) ? Math.max(0, ann-16452)*0.15 : 6310+(ann-58523)*0.205;
+    const provT = (ann <= 44678) ? Math.max(0, ann-11188)*0.087 : 2913+(ann-44678)*0.145;
+    const weeklyTax = Math.max(0, (fedT + provT) / 52);
+    const cpp = Math.min(89.35, Math.max(0, (ann-3500)*0.0595)/52);
+    const ei = Math.min(21.60, (ann*0.0163)/52);
+    const net = gross - weeklyTax - (cpp + ei) - FIXED_DED;
 
     document.getElementById('outGross').innerText="$"+gross.toFixed(2);
-    document.getElementById('outTax').innerText="-$"+tax.toFixed(2);
-    document.getElementById('outCpp').innerText="-$"+cpp.toFixed(2);
+    document.getElementById('outTax').innerText="-$"+weeklyTax.toFixed(2);
+    document.getElementById('outCpp').innerText="-$"+(cpp+ei).toFixed(2);
     document.getElementById('outNet').innerText="$"+net.toFixed(2);
+    document.getElementById('totalHours').innerText="Total: "+(r+ot+dt).toFixed(2)+"h";
+    document.getElementById('effRate').innerText = gross > 0 ? ((weeklyTax / gross) * 100).toFixed(1) + "%" : "0%";
+    document.getElementById('annNet').innerText = "$" + (net * 52).toLocaleString(undefined, {minimumFractionDigits: 2});
+    
+    const ytdBase = parseFloat(document.getElementById('ytdBase').value)||0;
+    document.getElementById('ytdTotal').innerText=`Total YTD: $${(ytdBase+gross).toLocaleString(undefined, {minimumFractionDigits: 2})}`;
+}
 
-    document.getElementById('totalHours').innerText="Total Hours: "+(r+ot+dt).toFixed(2);
+function resetHours(){
+    if(confirm("Clear all hours?")){
+        document.querySelectorAll('.val-reg, .val-ot, .val-dt').forEach(i=>i.value="");
+        document.getElementById('vacPayout').value="";
+        document.getElementById('sickDate').value="";
+        saveAndCalc();
+    }
+}
 
-    const ytd = parseFloat(document.getElementById('ytdBase').value)||0;
-    document.getElementById('ytdTotal').innerText=`Total YTD: $${(ytd+gross).toFixed(2)}`;
+function rolloverWeek() {
+    if(confirm("Rollover gross to YTD and reset week?")) {
+        const curGross = parseFloat(document.getElementById('outGross').innerText.replace('$',''));
+        const ytd = parseFloat(document.getElementById('ytdBase').value)||0;
+        document.getElementById('ytdBase').value = (ytd + curGross).toFixed(2);
+        resetHours();
+    }
+}
+
+function resetHistory(){
+    if(confirm("Wipe all YTD history?")){
+        document.getElementById('ytdBase').value="0.00";
+        saveAndCalc();
+    }
 }
 
 function sendReport(reqOnly){
     const name = document.getElementById('driverName').value;
     const week = document.getElementById('weekEnding').value;
-    const bIn = document.getElementById('bankIn').value;
-    const bOut = document.getElementById('payOut').value;
-    const vPay = document.getElementById('vacPayout').value;
-    const vacDate = document.getElementById('vacDate').value;
-    const sickDate = document.getElementById('sickDate').value;
-    const notes = document.getElementById('payrollNotes').value;
-
-    let subject = reqOnly ? `Payroll Request - ${name}` : `Log - ${name} - ${week}`;
-
+    const vS = document.getElementById('vacStart').value;
+    const vE = document.getElementById('vacEnd').value;
     let body = `NAME: ${name}\nWEEK: ${week}\n\n`;
-
-    if(bIn) body += `BANKING IN: ${bIn} hours\n`;
-    if(bOut) body += `BANK PAYOUT: ${bOut} hours\n`;
-    if(vPay) body += `VACATION PAYOUT: $${vPay}\n`;
-    if(vacDate) body += `VACATION DATE: ${vacDate}\n`;
-    if(sickDate) body += `SICK DAY: ${sickDate}\n`;
-    if(notes) body += `NOTES: ${notes}\n`;
-
+    if(vS) body += `VACATION: ${vS} to ${vE}\n`;
+    body += `\nNOTES:\n${document.getElementById('payrollNotes').value}\n`;
     if(!reqOnly){
-        body += `EST. GROSS: ${document.getElementById('outGross').innerText}\n`;
-        body += `EST. NET: ${document.getElementById('outNet').innerText}\n`;
+        body += `\nGROSS: ${document.getElementById('outGross').innerText}\nNET: ${document.getElementById('outNet').innerText}\n`;
     }
-
-    window.location.href = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-}
-
-function resetHours(){
-    if(confirm("Reset all hours for this week?")){
-        document.querySelectorAll('.val-reg, .val-ot, .val-dt').forEach(i=>i.value="");
-        document.getElementById('bankIn').value="";
-        document.getElementById('payOut').value="";
-        document.getElementById('vacPayout').value="";
-        document.getElementById('vacDate').value="";
-        document.getElementById('sickDate').value="";
-        document.getElementById('payrollNotes').value="";
-        saveAndCalc();
-    }
-}
-
-function resetHistory(){
-    if(confirm("Reset YTD History?")){
-        document.getElementById('ytdBase').value=0;
-        document.getElementById('ytdTotal').innerText="Total YTD: $0";
-    }
+    window.location.href = `mailto:?subject=${encodeURIComponent(name + " - Payroll")}&body=${encodeURIComponent(body)}`;
 }
 
 init();
-
-if('serviceWorker' in navigator){
-    navigator.serviceWorker.register('service-worker.js');
-}
-
+if('serviceWorker' in navigator) navigator.serviceWorker.register('service-worker.js');
 </script>
-
 </body>
 </html>
