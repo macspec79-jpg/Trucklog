@@ -27,7 +27,7 @@ label{ font-size:.7em; color:#888; text-transform:uppercase; margin-bottom:4px; 
 .line{ display:flex; justify-content:space-between; margin:6px 0; font-size:.9em; }
 .net-total{ font-size:1.8em; color:var(--green); font-weight:900; border-top:1px solid #333; padding-top:10px; margin-top:10px; }
 .action-bar{ position:fixed; bottom:0; left:0; right:0; background:#000; padding:15px; border-top:1px solid var(--border); display:flex; flex-direction:column; gap:8px; z-index:200; }
-.btn{ padding:14px; border-radius:8px; font-weight:bold; border:none; cursor:pointer; text-transform:uppercase; font-size: 0.8em; }
+.btn{ padding:14px; border-radius:8px; font-weight:bold; border:none; cursor:pointer; text-transform:uppercase; font-size: 0.8em; transition: background 0.3s; }
 .btn-main{ background:var(--blue); color:white; }
 </style>
 </head>
@@ -37,7 +37,10 @@ label{ font-size:.7em; color:#888; text-transform:uppercase; margin-bottom:4px; 
     <div id="logPage" class="page active">
         <div style="display:flex; justify-content:space-between; margin-bottom:10px; align-items: center;">
             <span style="font-size:0.8em; color:var(--orange); font-weight:bold;" id="totalHours">Total: 0.00h</span>
-            <button class="btn" style="padding:5px 10px; font-size:0.6em; background:#444;" onclick="resetHours()">Reset Week</button>
+            <div style="display:flex; gap:10px;">
+                <button id="saveBtn" class="btn" style="padding:5px 10px; font-size:0.6em; background:var(--blue); color:white;" onclick="manualSave()">Save</button>
+                <button class="btn" style="padding:5px 10px; font-size:0.6em; background:#444; color:white;" onclick="resetHours()">Reset Week</button>
+            </div>
         </div>
 
         <div class="card">
@@ -87,9 +90,63 @@ function init(){
             </div>
         </div>`;
     });
+    
+    // Load data after generating the HTML blocks
+    loadData();
 }
 
-function saveAndCalc(){
+function saveToLocalStorage() {
+    const data = {
+        name: document.getElementById('driverName').value,
+        week: document.getElementById('weekEnding').value,
+        days: []
+    };
+    
+    document.querySelectorAll('.day-block').forEach(b => {
+        data.days.push({
+            reg: b.querySelector('.val-reg').value,
+            ot: b.querySelector('.val-ot').value,
+            dt: b.querySelector('.val-dt').value
+        });
+    });
+    
+    localStorage.setItem('truckerAppData', JSON.stringify(data));
+}
+
+function manualSave() {
+    saveToLocalStorage();
+    const btn = document.getElementById('saveBtn');
+    btn.innerText = "Saved!";
+    btn.style.background = "var(--green)";
+    btn.style.color = "black";
+    
+    setTimeout(() => {
+        btn.innerText = "Save";
+        btn.style.background = "var(--blue)";
+        btn.style.color = "white";
+    }, 2000);
+}
+
+function loadData() {
+    const saved = localStorage.getItem('truckerAppData');
+    if (saved) {
+        const data = JSON.parse(saved);
+        document.getElementById('driverName').value = data.name || '';
+        document.getElementById('weekEnding').value = data.week || '';
+        
+        const blocks = document.querySelectorAll('.day-block');
+        data.days.forEach((day, index) => {
+            if (blocks[index]) {
+                blocks[index].querySelector('.val-reg').value = day.reg || '';
+                blocks[index].querySelector('.val-ot').value = day.ot || '';
+                blocks[index].querySelector('.val-dt').value = day.dt || '';
+            }
+        });
+        saveAndCalc(false); // Calculate but don't re-save while loading
+    }
+}
+
+function saveAndCalc(triggerSave = true){
     let r=0, ot=0, dt=0;
     document.querySelectorAll('.day-block').forEach(b=>{
         r+=parseFloat(b.querySelector('.val-reg').value)||0;
@@ -114,11 +171,17 @@ function saveAndCalc(){
     document.getElementById('totalHours').innerText="Total: "+(r+ot+dt).toFixed(2)+"h";
     document.getElementById('effRate').innerText = gross > 0 ? ((weeklyTax / gross) * 100).toFixed(1) + "%" : "0%";
     document.getElementById('annNet').innerText = "$" + (net * 52).toLocaleString(undefined, {minimumFractionDigits: 2});
+    
+    // Auto-save whenever a value changes
+    if (triggerSave) {
+        saveToLocalStorage();
+    }
 }
 
 function resetHours(){
     if(confirm("Clear all hours?")){
-        document.querySelectorAll('.val-reg, .val-ot, .val-dt').forEach(i=>i.value="");
+        // Clears hours and date, but keeps your driver name
+        document.querySelectorAll('.val-reg, .val-ot, .val-dt, #weekEnding').forEach(i=>i.value="");
         saveAndCalc();
     }
 }
