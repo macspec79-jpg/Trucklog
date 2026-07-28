@@ -74,11 +74,13 @@ label{ font-size:.7em; color:#888; text-transform:uppercase; margin-bottom:4px; 
 const RATE=25.75;
 const FIXED_DED=184.01;
 
+// Replace this with the exact URL path to your folder
+const API_URL = 'http://185.56.20.208/downloads/trucklog/';
+
 function init(){
     const days=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
     const cont=document.getElementById('logContainer');
     days.forEach(day=>{
-        // Apply orange highlight to Friday and Saturday only
         const highlight = (day === "Fri" || day === "Sat") ? "border-left: 4px solid var(--orange)" : "";
         cont.innerHTML+=`
         <div class="day-block" style="${highlight}">
@@ -91,11 +93,10 @@ function init(){
         </div>`;
     });
     
-    // Load data after generating the HTML blocks
     loadData();
 }
 
-function saveToLocalStorage() {
+async function saveToServer() {
     const data = {
         name: document.getElementById('driverName').value,
         week: document.getElementById('weekEnding').value,
@@ -110,11 +111,21 @@ function saveToLocalStorage() {
         });
     });
     
-    localStorage.setItem('truckerAppData', JSON.stringify(data));
+    try {
+        await fetch(API_URL + 'save.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+        });
+    } catch (error) {
+        console.error("Failed to save to server:", error);
+    }
 }
 
-function manualSave() {
-    saveToLocalStorage();
+async function manualSave() {
+    await saveToServer();
     const btn = document.getElementById('saveBtn');
     btn.innerText = "Saved!";
     btn.style.background = "var(--green)";
@@ -127,22 +138,29 @@ function manualSave() {
     }, 2000);
 }
 
-function loadData() {
-    const saved = localStorage.getItem('truckerAppData');
-    if (saved) {
-        const data = JSON.parse(saved);
+async function loadData() {
+    try {
+        const response = await fetch(API_URL + 'load.php');
+        if (!response.ok) return; 
+        
+        const data = await response.json();
+        
         document.getElementById('driverName').value = data.name || '';
         document.getElementById('weekEnding').value = data.week || '';
         
         const blocks = document.querySelectorAll('.day-block');
-        data.days.forEach((day, index) => {
-            if (blocks[index]) {
-                blocks[index].querySelector('.val-reg').value = day.reg || '';
-                blocks[index].querySelector('.val-ot').value = day.ot || '';
-                blocks[index].querySelector('.val-dt').value = day.dt || '';
-            }
-        });
-        saveAndCalc(false); // Calculate but don't re-save while loading
+        if (data.days) {
+            data.days.forEach((day, index) => {
+                if (blocks[index]) {
+                    blocks[index].querySelector('.val-reg').value = day.reg || '';
+                    blocks[index].querySelector('.val-ot').value = day.ot || '';
+                    blocks[index].querySelector('.val-dt').value = day.dt || '';
+                }
+            });
+        }
+        saveAndCalc(false); 
+    } catch (error) {
+        console.error("Failed to load from server:", error);
     }
 }
 
@@ -172,15 +190,13 @@ function saveAndCalc(triggerSave = true){
     document.getElementById('effRate').innerText = gross > 0 ? ((weeklyTax / gross) * 100).toFixed(1) + "%" : "0%";
     document.getElementById('annNet').innerText = "$" + (net * 52).toLocaleString(undefined, {minimumFractionDigits: 2});
     
-    // Auto-save whenever a value changes
     if (triggerSave) {
-        saveToLocalStorage();
+        saveToServer();
     }
 }
 
 function resetHours(){
     if(confirm("Clear all hours?")){
-        // Clears hours and date, but keeps your driver name
         document.querySelectorAll('.val-reg, .val-ot, .val-dt, #weekEnding').forEach(i=>i.value="");
         saveAndCalc();
     }
@@ -195,7 +211,6 @@ function sendReport(){
 }
 
 init();
-if('serviceWorker' in navigator) navigator.serviceWorker.register('service-worker.js');
 </script>
 </body>
 </html>
